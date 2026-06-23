@@ -1,0 +1,62 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.docsSidebar.category.1. 入门案例": {
+    "message": "1. Getting Started",
+    "description": "The label for category 1. 入门案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.1. 入门案例.link.generated-index.description": {
+    "message": "Basic peripheral tutorials",
+    "description": "The generated-index page description for category 1. 入门案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.2. 低阶案例": {
+    "message": "2. Basic Cases",
+    "description": "The label for category 2. 低阶案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.2. 低阶案例.link.generated-index.description": {
+    "message": "Entry-level AI application cases",
+    "description": "The generated-index page description for category 2. 低阶案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.2.1 视觉案例": {
+    "message": "2.1 Vision Cases",
+    "description": "The label for category 2.1 视觉案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.2.2 语音案例": {
+    "message": "2.2 Audio Cases",
+    "description": "The label for category 2.2 语音案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.2.3 大模型案例": {
+    "message": "2.3 LLM Cases",
+    "description": "The label for category 2.3 大模型案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.3. 进阶案例": {
+    "message": "3. Intermediate Cases",
+    "description": "The label for category 3. 进阶案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.3. 进阶案例.link.generated-index.description": {
+    "message": "Interactive AI application cases",
+    "description": "The generated-index page description for category 3. 进阶案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.3.1 交互案例": {
+    "message": "3.1 Interactive Cases",
+    "description": "The label for category 3.1 交互案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.4. 高阶案例": {
+    "message": "4. Advanced Cases",
+    "description": "The label for category 4. 高阶案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.4. 高阶案例.link.generated-index.description": {
+    "message": "Embodied AI application cases",
+    "description": "The generated-index page description for category 4. 高阶案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.4.1 具身智能案例": {
+    "message": "4.1 Embodied AI Cases",
+    "description": "The label for category 4.1 具身智能案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.4.1.1 视觉-语言-动作模型": {
+    "message": "4.1.1 Vision-Language-Action Model",
+    "description": "The label for category 4.1.1 视觉-语言-动作模型 in sidebar docsSidebar"
+  }
+}
