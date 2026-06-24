@@ -58,5 +58,13 @@
   "sidebar.docsSidebar.category.4.1.1 视觉-语言-动作模型": {
     "message": "4.1.1 Vision-Language-Action Model",
     "description": "The label for category 4.1.1 视觉-语言-动作模型 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.2. 初阶案例": {
+    "message": "2. Basic Cases",
+    "description": "The label for category 2. 初阶案例 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.2. 初阶案例.link.generated-index.description": {
+    "message": "Entry-level AI application cases",
+    "description": "The generated-index page description for category 2. 初阶案例 in sidebar docsSidebar"
   }
 }
