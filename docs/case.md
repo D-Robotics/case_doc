@@ -20,7 +20,7 @@ slug: /case
 
 在 S600 端侧部署入门级 AI 模型，覆盖视觉、语音与大模型三类典型场景，提供完整的环境准备、案例启动与效果展示流程。
 
-- **[目标检测](/basic/object_detection)**：基于 robogo 平台 YOLO26x 的标注、训练、量化与部署，支持图片与 USB 摄像头实时检测（单核 120fps）。
+- **[目标检测](/basic/object_detection)**：支持图片与 USB 摄像头实时检测（单核 120fps）。
 - **[语音转文字（ASR）](/basic/speech_to_text)**：使用 Whisper-medium 模型，将麦克风或音频文件中的语音实时转为文本。
 - **[大语言模型（LLM）](/basic/llm)**：部署 Qwen3-8B，在终端进行文字问答与对话交互。
 - **[视觉语言模型（VLM）](/basic/vlm)**：部署 Qwen3VL-8B，支持基于图片的看图问答与图文理解。
