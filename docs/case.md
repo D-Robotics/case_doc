@@ -29,7 +29,7 @@ slug: /case
 
 将多种模态能力组合，构建更接近真实产品的交互体验。
 
-- **[多模态交互助手](/intermediate/vlm_voice_dialogue)**：结合 Whisper-medium 与 Qwen3VL-8B，通过 USB 麦克风与摄像头实现“语音 + 视觉”多模态对话，例如向系统提问“你看到了什么”。
+- **[多模态交互助手](/intermediate/vlm_voice_dialogue)**：结合 Whisper-medium 与 Qwen3VL-8B，通过 USB 麦克风与摄像头实现 “语音 + 视觉” 多模态对话，例如向系统提问 “你看到了什么” 。
 
 ### 4. 高阶案例
 
