@@ -20,7 +20,7 @@ Introduces how to connect and use common peripherals, helping you set up the har
 
 Deploy entry-level AI models on the S600 device, covering vision, audio, and LLM scenarios with complete environment setup, case launch, and result demonstration workflows.
 
-- **[Object Detection](/basic/object_detection)**: Annotation, training, quantization, and deployment of YOLO26x on the robogo platform, supporting image and USB camera real-time detection (120 fps on a single core).
+- **[Object Detection](/basic/object_detection)**: Supporting image and USB camera real-time detection (120 fps on a single core).
 - **[Voice-to-Text (ASR)](/basic/speech_to_text)**: Uses the Whisper-medium model to convert speech from a microphone or audio file to text in real time.
 - **[Large Language Model (LLM)](/basic/llm)**: Deploy Qwen3-8B for text Q&A and conversational interaction in the terminal.
 - **[Vision-Language Model (VLM)](/basic/vlm)**: Deploy Qwen3VL-8B for image-based Q&A and multimodal understanding.
