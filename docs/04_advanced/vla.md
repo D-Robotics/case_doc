@@ -50,6 +50,12 @@ VLA（Vision-Language-Action Model，视觉-语言-动作模型）是一种融�
 
 ### 准备环境
 
+:::warning
+
+请确保 PC 环境已安装 Conda，且 Conda 使用正常。Conda 安装可参考[Conda 安装](https://docs.conda.org.cn/projects/conda/en/stable/user-guide/install/linux.html)。
+
+:::
+
 ```shell
 #下载仓库
 git clone https://github.com/D-Robotics/RoboTwin.git

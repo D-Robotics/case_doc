@@ -50,6 +50,12 @@ This workflow requires a PC-side simulation environment. The interaction flow is
 
 ### Environment Setup
 
+:::warning
+
+Please ensure that Conda is installed in the PC environment and that Conda is functioning properly. For Conda installation, please refer to [Conda Installation](https://docs.conda.org.cn/projects/conda/en/stable/user-guide/install/linux.html).
+
+:::
+
 ```shell
 # Clone repository
 git clone https://github.com/D-Robotics/RoboTwin.git
