@@ -33,12 +33,12 @@ tar xvf yolo26x_demo.tar
 # Enter the target path
 cd yolo26x_demo/ultralytics_yolo26/runtime/python
 
-# Run detection on an image; use --test-img for the image and --model-path for the model
-python3 main.py
+# Specify an image for detection; specify the image via --test-img and the model via --model-path
+python3 main.py --task detect --model-path ../../model/yolo26x_nashp_640x640_nv12.hbm --label-file ../../../coco/coco_classes.names --test-img kite.jpg --img-save-path result.jpg
 
-# Start the camera; use --camera-id to specify the USB camera
-# For smooth visualization, connect a display via HDMI and run the command in a desktop terminal
-python3 main.py --camera-id 0
+# Start the camera; specify the USB camera via --camera-id
+# To ensure proper and smooth visualization functionality, it is recommended to connect a screen via HDMI and run the command in a terminal on the desktop
+python3 main.py --camera-id 0 --task detect --model-path ../../model/yolo26x_nashp_640x640_nv12.hbm --label-file ../../../coco/coco_classes.names
 ```
 
 ### Result Demo

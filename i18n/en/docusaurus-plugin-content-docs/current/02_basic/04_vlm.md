@@ -47,6 +47,10 @@ bash run_vlm.sh qwen3vl_8b_config.json image0.jpg
 
 ## Result Demo
 
+:::info
+The images in the video below are for demonstration of the model's inference effects; actual operation does not support loading preview images.
+:::
+
 <video controls width="100%" preload="metadata">
  <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/vlm2.mp4" type="video/mp4" />
  Your browser does not support the video tag.

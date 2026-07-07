@@ -16,7 +16,7 @@ slug: /case
 - **[USB 外设使用](/getting_started/usb_peripherals)**：涵盖 USB 串口、USB 摄像头与 USB 语音设备的 Python 调用示例，包括 OpenCV 采图、sounddevice 录音播放等。
 - **[UART 使用](/getting_started/uart)**：介绍 UART 通信原理与 pyserial 调用流程，并以 STS3215 总线舵机为例演示 RS485 控制。
 
-### 2. 低阶案例
+### 2. 初阶案例
 
 在 S600 端侧部署入门级 AI 模型，覆盖视觉、语音与大模型三类典型场景，提供完整的环境准备、案例启动与效果展示流程。
 
