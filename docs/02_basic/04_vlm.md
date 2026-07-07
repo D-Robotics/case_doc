@@ -47,6 +47,11 @@ bash run_vlm.sh qwen3vl_8b_config.json image0.jpg
 
 ## 效果展示
 
+:::info
+下方视频中图片为模型推理效果展示，实际运行不支持加载预览图片。
+:::
+
+
 <video controls width="100%" preload="metadata">
  <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/vlm2.mp4" type="video/mp4" />
  您的浏览器不支持 video 标签。
