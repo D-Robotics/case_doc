@@ -29,6 +29,22 @@ USB（通用串行总线）是为了统一电脑外设接口而生的高速串�
 
 串口通信最常见就是通过 USB 转串口模块（如 CH340、CP2102）连接设备，在电脑上映射成一个 COM 口（Linux 下是 `/dev/ttyUSB0` 等）。Python 里推荐用 `pyserial`，可以使用 pip 安装。
 
+:::warning
+
+Ubuntu 24.04 对 Python 包管理相比以前有一些变化，系统 Python 默认启用了 PEP 668（Externally Managed Environment），因此不推荐直接使用 `pip install`，推荐使用虚拟环境或者 Conda，虚拟环境创建方法如下：
+
+```shell
+sudo apt install python3-venv python3-pip
+python3 -m venv myenv
+source myenv/bin/activate
+
+#终端出现（myenv）说明创建成功，可正常 pip install
+(myenv) root@ubuntu:~#
+```
+
+
+:::
+
 ```text
 pip install pyserial
 ```

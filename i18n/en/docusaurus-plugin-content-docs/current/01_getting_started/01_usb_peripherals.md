@@ -29,6 +29,21 @@ Because USB is a general-purpose interface, different device types and protocols
 
 Serial communication most often uses a USB-to-serial module (e.g. CH340, CP2102), which appears as a COM port on Windows or `/dev/ttyUSB0` on Linux. Use `pyserial`, installable via pip.
 
+:::warning
+
+Ubuntu 24.04 has some changes to Python package management compared to previous versions. The system Python has PEP 668 (Externally Managed Environment) enabled by default, so it is not recommended to use `pip install` directly. It is recommended to use a virtual environment or Conda instead. The method for creating a virtual environment is as follows:
+
+```shell
+sudo apt install python3-venv python3-pip
+python3 -m venv myenv
+source myenv/bin/activate
+
+# If (myenv) appears in the terminal, the environment has been created successfully and you can use pip install normally.
+(myenv) root@ubuntu:~#
+```
+
+:::
+
 ```text
 pip install pyserial
 ```
