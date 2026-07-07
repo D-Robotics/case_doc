@@ -21,9 +21,35 @@ UART（通用异步收发传输器）是最基础的点对点串行通信接口�
 
 板载资源：RDK 的 40pin 引脚提供多路 UART，对应设备节点如 /dev/ttyS0、/dev/ttyAMA0 等。
 
+## 硬件连接
+
+在 RDK S600 平台中，可以使用 USB 串口和 TTL 串口。TTL 串口位置如下图所示：
+
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl.png" alt="TTL 串口位置" width="60%" />
+
+该接口的连接器型号为 X1251WRS-10HF-LPSW。使用相同型号的连接器公头可以将 TTL UART 信号引出，接口线序如下（MCU 域 UART 接口本节不使用）：
+
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl_interface.png" alt="TTL 接口线序" width="60%" />
+
 ## 使用方法
 
 Python 中可以使用 pyserial 操作 UART，使用如下 pip 命令安装，方式同 USB 串口描述一致：
+
+:::warning
+
+Ubuntu 24.04 对 Python 包管理相比以前有一些变化，系统 Python 默认启用了 PEP 668（Externally Managed Environment），因此不推荐直接使用 `pip install`，推荐使用虚拟环境或者 Conda，虚拟环境创建方法如下：
+
+```shell
+sudo apt install python3-venv python3-pip
+python3 -m venv myenv
+source myenv/bin/activate
+
+#终端出现（myenv）说明创建成功，可正常 pip install
+(myenv) root@ubuntu:~#
+```
+
+
+:::
 
 ```shell
 pip install pyserial
