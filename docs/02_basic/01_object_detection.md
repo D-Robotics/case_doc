@@ -33,12 +33,12 @@ tar xvf yolo26x_demo.tar
 #进入指定路径
 cd yolo26x_demo/ultralytics_yolo26/runtime/python
 
-#指定图片进行检测，通过 --test-img 指定图片，通过 --model-path 指定模型
-python3 main.py
+#指定图片进行检测，通过--test-img指定图片，通过--model-path指定模型
+python3 main.py --task detect --model-path ../../model/yolo26x_nashp_640x640_nv12.hbm --label-file ../../../coco/coco_classes.names --test-img kite.jpg --img-save-path result.jpg
 
-#启动摄像头，通过 --camera-id 指定 usb 相机
-#为保证可视化功能正常且流畅，建议通过 HDMI 连接屏幕，在桌面端开启终端输入指令
-python3 main.py --camera-id 0
+#启动摄像头，通过--camera-id指定usb相机
+#为保证可视化功能正常且流畅，建议通过HDMI连接屏幕，在桌面端开启终端输入指令
+python3 main.py --camera-id 0 --task detect --model-path ../../model/yolo26x_nashp_640x640_nv12.hbm --label-file ../../../coco/coco_classes.names
 ```
 
 ### 效果展示
