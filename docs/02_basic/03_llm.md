@@ -47,6 +47,6 @@ bash run_llm.sh
 ## 效果展示
 
 <video controls width="100%" preload="metadata">
- <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/llm.mp4" type="video/mp4" />
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/llm.mp4" type="video/mp4" />
  您的浏览器不支持 video 标签。
 </video>

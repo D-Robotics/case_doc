@@ -53,6 +53,6 @@ bash run_vlm.sh qwen3vl_8b_config.json image0.jpg
 
 
 <video controls width="100%" preload="metadata">
- <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/vlm2.mp4" type="video/mp4" />
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/vlm2.mp4" type="video/mp4" />
  您的浏览器不支持 video 标签。
 </video>

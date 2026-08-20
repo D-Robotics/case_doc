@@ -74,6 +74,6 @@ bash run_asr_vlm_demo.sh
 ## Result Demo
 
 <video controls width="100%" preload="metadata">
- <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/vlm_voice_dialogue.mp4" type="video/mp4" />
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/vlm_voice_dialogue.mp4" type="video/mp4" />
  Your browser does not support the video tag.
 </video>
