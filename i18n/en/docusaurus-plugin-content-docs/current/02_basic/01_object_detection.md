@@ -44,6 +44,6 @@ python3 main.py --camera-id 0 --task detect --model-path ../../model/yolo26x_nas
 ### Result Demo
 
 <video controls width="100%" preload="metadata">
- <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/effect.webm" type="video/webm" />
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/effect.webm" type="video/webm" />
  Your browser does not support the video tag.
 </video>

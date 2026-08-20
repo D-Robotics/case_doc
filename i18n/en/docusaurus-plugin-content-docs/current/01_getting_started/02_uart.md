@@ -26,11 +26,11 @@ On-board resources: RDK 40-pin header provides multiple UARTs, e.g. `/dev/ttyS0`
 
 On the RDK S600 platform, both USB UART and TTL UART can be used. The location of the TTL UART interface is shown in the figure below:
 
-<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl.png" alt="TTL UART Location" width="60%" />
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/ttl.png" alt="TTL UART Location" width="60%" />
 
 The connector model for this interface is X1251WRS-10HF-LPSW. Using a male connector of the same model, the TTL UART signals can be brought out. The interface pinout is as follows (the MCU domain UART interface is not used in this section):
 
-<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl_interface.png" alt="TTL Interface Pinout" width="60%" />
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/ttl_interface.png" alt="TTL Interface Pinout" width="60%" />
 
 ## Usage
 

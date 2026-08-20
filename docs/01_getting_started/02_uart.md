@@ -25,11 +25,11 @@ UART（通用异步收发传输器）是最基础的点对点串行通信接口�
 
 在 RDK S600 平台中，可以使用 USB 串口和 TTL 串口。TTL 串口位置如下图所示：
 
-<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl.png" alt="TTL 串口位置" width="60%" />
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/ttl.png" alt="TTL 串口位置" width="60%" />
 
 该接口的连接器型号为 X1251WRS-10HF-LPSW。使用相同型号的连接器公头可以将 TTL UART 信号引出，接口线序如下（MCU 域 UART 接口本节不使用）：
 
-<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl_interface.png" alt="TTL 接口线序" width="60%" />
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/ttl_interface.png" alt="TTL 接口线序" width="60%" />
 
 ## 使用方法
 

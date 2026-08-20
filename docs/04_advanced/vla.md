@@ -373,7 +373,7 @@ step: 1 / 400
 ...
 ```
 
-![](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/vla_effect.png)
+![](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/vla_effect.png)
 
 
 
