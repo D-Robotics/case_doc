@@ -11,7 +11,7 @@
 <script defer="defer" src="https://cloud.umami.is/script.js" data-website-id="b0c771b8-947e-4fa4-8880-606ecab89c36"></script>
 <script src="https://hm.baidu.com/hm.js?24dd63cad43b63889ea6bede5fd1ab9e" async></script>
 <script src="/case_doc/js/dify-config.js"></script><link rel="stylesheet" href="/case_doc/assets/css/styles.b274b1d2.css">
-<script src="/case_doc/assets/js/runtime~main.7a998f07.js" defer="defer"></script>
+<script src="/case_doc/assets/js/runtime~main.6883eebb.js" defer="defer"></script>
 <script src="/case_doc/assets/js/main.0ca4e7ac.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -29,9 +29,9 @@
 <p>板载资源：RDK 的 40pin 引脚提供多路 UART，对应设备节点如 /dev/ttyS0、/dev/ttyAMA0 等。</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="硬件连接">硬件连接<a href="#硬件连接" class="hash-link" aria-label="硬件连接的直接链接" title="硬件连接的直接链接">​</a></h2>
 <p>在 RDK S600 平台中，可以使用 USB 串口和 TTL 串口。TTL 串口位置如下图所示：</p>
-<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl.png" alt="TTL 串口位置" width="60%">
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/ttl.png" alt="TTL 串口位置" width="60%">
 <p>该接口的连接器型号为 X1251WRS-10HF-LPSW。使用相同型号的连接器公头可以将 TTL UART 信号引出，接口线序如下（MCU 域 UART 接口本节不使用）：</p>
-<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/zh/ttl_interface.png" alt="TTL 接口线序" width="60%">
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/ttl_interface.png" alt="TTL 接口线序" width="60%">
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="使用方法">使用方法<a href="#使用方法" class="hash-link" aria-label="使用方法的直接链接" title="使用方法的直接链接">​</a></h2>
 <p>Python 中可以使用 pyserial 操作 UART，使用如下 pip 命令安装，方式同 USB 串口描述一致：</p>
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>注意</div><div class="admonitionContent_BuS1"><p>Ubuntu 24.04 对 Python 包管理相比以前有一些变化，系统 Python 默认启用了 PEP 668（Externally Managed Environment），因此不推荐直接使用 <code>pip install</code>，推荐使用虚拟环境或者 Conda，虚拟环境创建方法如下：</p><div class="language-shell codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-shell codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">sudo apt install python3-venv python3-pip</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">python3 -m venv myenv</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">source myenv/bin/activate</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">#终端出现（myenv）说明创建成功，可正常 pip install</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">(myenv) root@ubuntu:~#</span><br></span></code></pre></div></div></div></div>
@@ -42,7 +42,7 @@
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="总线舵机使用">总线舵机使用<a href="#总线舵机使用" class="hash-link" aria-label="总线舵机使用的直接链接" title="总线舵机使用的直接链接">​</a></h3>
 <p>以 STS3215 总线舵机为例。</p>
 <p>该舵机总线需要 RS485 电平才可正常通信，使用合适的控制板/转接板将板卡发出的 USB/TTL 电平转换为 RS485 电平。</p>
-<p>该舵机使用 FT-SCS 自定义协议， 协议的命令帧如下：</p>
+<p>该舵机使用 FT-SCS 自定义协议，协议的命令帧如下：</p>
 <div class="markdown-table-scroll"><table><thead><tr><th>字头</th><th>ID 号</th><th>数据长度</th><th>指令</th><th>参数</th><th>校验和</th></tr></thead><tbody><tr><td>0xFF 0xFF</td><td>ID</td><td>Length</td><td>Instruction</td><td>Parameter1 …Parameter N</td><td>Check Sum</td></tr></tbody></table></div>
 <p>查阅舵机手册获取数据长度、写指令、参数等信息，控制舵机角度对应的数据长度为 <code>0x04</code>，写指令为 <code>0x03</code>，参数有 3 个：<code>目标位置段地址 0x2A</code>，<code>目标位置低 8 位</code>，<code>目标位置高 8 位</code>。目标位置的取值范围：-32767 ~ 32767，BIT15 为符号位。</p>
 <p>例：欲控制 ID 为 1 的舵机角度为 10000，需要按在一帧串口通信中发送以下内容，然后停止。</p>
