@@ -3,7 +3,7 @@ sidebar_position: 1
 slug: /case
 ---
 
-# RDK S600 Application Cases
+# RDK S600 Application Cases Manual
 
 This documentation collects typical application cases for the RDK S600 platform, organized by difficulty from basic peripheral integration to on-device AI inference, multimodal interaction, and embodied intelligence—helping you get started quickly and dive deeper step by step.
 
@@ -33,9 +33,10 @@ Combines multiple modality capabilities to build interaction experiences closer 
 
 ### 4. Advanced Cases
 
-For embodied intelligence scenarios, demonstrating on-device VLA (Vision-Language-Action) model deployment and PC simulation co-debugging.
+For embodied intelligence scenarios, demonstrating on-device VLA (Vision-Language-Action) model deployment, PC simulation co-debugging, and HoloBrain real-robot grasping.
 
 - **[Vision-Language-Action Model (VLA)](/advanced/vla)**: Deploy the RoboTwin simulation environment on PC and the Pi0 model on S600 for inference, covering PC simulation deployment, S600 on-device deployment, and run results.
+- **[HoloBrain](/advanced/holobrain)**: Configure the HoloBrain environment on RDK S600, deploy the model, and run a general object-grasping task, covering hardware setup, environment setup, and start/stop. See [FAQ](/advanced/holobrain/faq) for common issues.
 
 ### 5. More Resources
 
