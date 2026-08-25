@@ -13,7 +13,7 @@ The main directories are described as follows:
 - `scripts/`: Maintenance and build helper scripts (numbering, link fixing, scope building, etc.)
 - `src/`: Theme customization, plugins, and remark extensions
 - `static/`: Static assets
-- `.github/workflows/`: CI/CD workflows (Pages deployment and OSS synchronization)
+- `.github/workflows/`: CI/CD workflows (Pages deployment, OSS sync, Algolia index update)
 - `docusaurus.config.js`: Main site configuration
 - `sidebars.js`: Entry point for document sidebar configuration
 
