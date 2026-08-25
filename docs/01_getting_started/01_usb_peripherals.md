@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: USB 外设使用
+sidebar_label: 1. USB 外设使用
 ---
 
 # USB 外设使用

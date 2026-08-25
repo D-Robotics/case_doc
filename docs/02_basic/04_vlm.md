@@ -1,6 +1,6 @@
 ---
 sidebar_position: 4
-sidebar_label: 视觉语言模型（VLM）
+sidebar_label: 4. 视觉语言模型（VLM）
 ---
 
 # 视觉语言模型（VLM）

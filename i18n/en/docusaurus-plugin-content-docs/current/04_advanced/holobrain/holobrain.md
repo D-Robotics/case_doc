@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: HoloBrain General Object Grasping
+sidebar_label: 1. HoloBrain General Object Grasping
 ---
 
 # HoloBrain General Object Grasping

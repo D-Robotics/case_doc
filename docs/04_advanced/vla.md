@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: 视觉语言动作模型（VLA）
+sidebar_label: 1. 视觉语言动作模型（VLA）
 ---
 
 # 视觉语言动作模型（VLA）

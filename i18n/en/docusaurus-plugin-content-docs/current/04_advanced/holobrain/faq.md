@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: FAQ
+sidebar_label: 2. FAQ
 ---
 
 # FAQ

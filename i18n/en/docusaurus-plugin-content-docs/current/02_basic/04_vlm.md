@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: Vision-Language Model (VLM)
+sidebar_label: 4. Vision-Language Model (VLM)
 ---
 
 # Vision-Language Model (VLM)

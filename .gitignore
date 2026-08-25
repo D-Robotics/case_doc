@@ -37,3 +37,8 @@ yarn.lock
 .idea
 
 .env.local
+
+# Local extract / migration work (not needed to run the site)
+.migration-work/
+pdf_extract.txt
+Thumbs.db

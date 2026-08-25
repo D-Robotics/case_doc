@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: 多模态交互助手
+sidebar_label: 1. 多模态交互助手
 ---
 
 # 多模态交互助手

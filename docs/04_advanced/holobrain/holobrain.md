@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: HoloBrain 通用物体抓取
+sidebar_label: 1. HoloBrain 通用物体抓取
 ---
 
 # HoloBrain 通用物体抓取
