@@ -149,6 +149,11 @@ sudo ip link set can_right type can bitrate 1000000
 ```bash
 sudo apt update
 sudo apt install tmux \
+    python3-colcon-common-extensions \
+    ros-jazzy-rosidl-default-generators \
+    ros-jazzy-ament-cmake-auto \
+    ros-jazzy-ament-lint-auto \
+    ros-jazzy-ros2launch \
     ros-jazzy-foxglove-bridge \
     ros-jazzy-rosbridge-server \
     ros-jazzy-realsense2-camera
@@ -158,6 +163,11 @@ sudo apt install tmux \
 | 软件包 | 作用 |
 | :--- |:--- |
 | tmux | 终端复用器，用于管理多个后台会话 |
+| python3-colcon-common-extensions | colcon 常用扩展，ROS 2 构建工具 |
+| ros-jazzy-rosidl-default-generators | ROS 接口定义语言默认代码生成器 |
+| ros-jazzy-ament-cmake-auto | ament 构建系统的 CMake 自动配置 |
+| ros-jazzy-ament-lint-auto | ament 代码规范检查自动配置 |
+| ros-jazzy-ros2launch | ROS 2 launch 启动文件工具 |
 | ros-jazzy-foxglove-bridge | Foxglove 可视化桥接 |
 | ros-jazzy-rosbridge-server | ROS 2 WebSocket 桥接服务 | 
 | ros-jazzy-realsense2-camera | Intel RealSense 深度相机驱动| 

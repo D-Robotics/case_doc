@@ -149,6 +149,11 @@ If `apt` reports that a package cannot be located, run `sudo apt update` first a
 ```bash
 sudo apt update
 sudo apt install tmux \
+    python3-colcon-common-extensions \
+    ros-jazzy-rosidl-default-generators \
+    ros-jazzy-ament-cmake-auto \
+    ros-jazzy-ament-lint-auto \
+    ros-jazzy-ros2launch \
     ros-jazzy-foxglove-bridge \
     ros-jazzy-rosbridge-server \
     ros-jazzy-realsense2-camera
@@ -158,6 +163,11 @@ sudo apt install tmux \
 | Package | Purpose |
 | :--- |:--- |
 | tmux | Terminal multiplexer for managing multiple background sessions |
+| python3-colcon-common-extensions | Common colcon extensions for ROS 2 builds |
+| ros-jazzy-rosidl-default-generators | Default generators for ROS interface definitions |
+| ros-jazzy-ament-cmake-auto | CMake auto-configuration for the ament build system |
+| ros-jazzy-ament-lint-auto | Auto-configuration for ament lint checks |
+| ros-jazzy-ros2launch | ROS 2 launch file tool |
 | ros-jazzy-foxglove-bridge | Foxglove visualization bridge |
 | ros-jazzy-rosbridge-server | ROS 2 WebSocket bridge service |
 | ros-jazzy-realsense2-camera | Intel RealSense depth camera driver |
