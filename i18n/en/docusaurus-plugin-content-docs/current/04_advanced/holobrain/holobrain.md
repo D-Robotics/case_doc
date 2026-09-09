@@ -84,6 +84,9 @@ lsusb
 #### Query Serial Number
 
 ```shell
+# Source the ROS 2 environment before querying the serial number
+source /opt/ros/jazzy/setup.bash
+
 # Query Serial Number; this serial will be used in the HoloBrain project config launch.yaml
 rs-enumerate-devices | grep Serial
 ```

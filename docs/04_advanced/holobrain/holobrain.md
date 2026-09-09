@@ -84,6 +84,9 @@ lsusb
 #### 查询 Serial Number
 
 ```shell
+#查询 Serial Number 前需先加载 ROS 2 环境
+source /opt/ros/jazzy/setup.bash
+
 #查询 Serial Number，该序列号在 HoloBrain 项目配置 -launch.yaml 中将会用到
 rs-enumerate-devices | grep Serial
 ```
