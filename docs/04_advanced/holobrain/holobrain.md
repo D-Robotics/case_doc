@@ -311,8 +311,12 @@ RoboOrchard
 ### 启动 BPU 推理服务
 
 ```shell
+cd ~
+wget https://sdk.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/holobrain_runtime_S600.tar.gz
+tar -xvf holobrain_runtime_S600.tar.gz
+
 #进入 script 文件
-cd holobrain_S600_S100P_0702/cpp_hbm_ucp/runtime/script
+cd ./holobrain_runtime_S600/cpp_hbm_ucp/runtime/script
 
 #运行
 DECODER_STEPS=5 sh run_hbm_http_server.sh

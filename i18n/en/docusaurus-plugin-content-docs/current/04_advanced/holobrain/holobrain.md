@@ -308,8 +308,12 @@ RoboOrchard
 ### Start the BPU Inference Service
 
 ```shell
+cd ~
+wget https://sdk.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/holobrain_runtime_S600.tar.gz
+tar -xvf holobrain_runtime_S600.tar.gz
+
 # Enter the script directory
-cd holobrain_S600_S100P_0702/cpp_hbm_ucp/runtime/script
+cd ./holobrain_runtime_S600/cpp_hbm_ucp/runtime/script
 
 # Run
 DECODER_STEPS=5 sh run_hbm_http_server.sh
