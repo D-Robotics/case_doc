@@ -128,6 +128,21 @@ sudo ip link set can_right type can bitrate 1000000
 | can_left | Left arm | 1Mbps |
 | can_right | Right arm | 1Mbps |
 
+#### Bring Up CAN Devices
+
+```shell
+# Bring up the CAN devices for the left and right arms
+sudo ifconfig can_left up
+sudo ifconfig can_right up
+```
+
+You can verify whether the CAN devices are up with the `ifconfig` command:
+
+```shell
+# Check whether the CAN devices are up
+ifconfig
+```
+
 
 
 :::info

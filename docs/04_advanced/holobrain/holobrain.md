@@ -128,6 +128,21 @@ sudo ip link set can_right type can bitrate 1000000
 | can_left | 左机械臂 | 1Mbps |
 | can_right | 右机械臂 | 1Mbps |
 
+#### 启动 CAN 设备
+
+```shell
+#启动左右机械臂的 CAN 设备
+sudo ifconfig can_left up
+sudo ifconfig can_right up
+```
+
+可通过 `ifconfig` 命令查询 CAN 设备是否已启动：
+
+```shell
+#查询 CAN 设备是否已启动
+ifconfig
+```
+
 
 
 :::info 说明
