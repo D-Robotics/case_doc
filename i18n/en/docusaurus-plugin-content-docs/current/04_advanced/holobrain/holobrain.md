@@ -165,7 +165,7 @@ sudo apt install tmux \
 ### Clone the RoboOrchard Repository
 
 ```bash
-git clone https://github.com/HorizonRobotics/RoboOrchard
+git clone https://github.com/wunuo1/RoboOrchard
 
 # Enter the RoboOrchard root directory
 cd RoboOrchard

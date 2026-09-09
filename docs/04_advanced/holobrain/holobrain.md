@@ -168,7 +168,7 @@ sudo apt install tmux \
 ### 克隆 RoboOrchard 仓库
 
 ```bash
-git clone https://github.com/HorizonRobotics/RoboOrchard
+git clone https://github.com/wunuo1/RoboOrchard
 
 #进入 RoboOrchard 根目录
 cd RoboOrchard
