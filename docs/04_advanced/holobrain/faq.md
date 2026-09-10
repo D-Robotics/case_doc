@@ -94,6 +94,6 @@ pip install \
 - 注意 `RoboOrchard/projects/HoloBrain/handeye_calib/launch_handeye_calib.sh` 脚本配置。
 - 启动 `./launch/start.sh` 之后，启动标定服务 `bash handeye_calib/launch_handeye_calib.sh`。
 - 短按机械臂上的按钮变为绿色，即可手动移动机械臂，移动至不同的位置并单击 **Record Current Pose**。
-- 记录多个位置之后点击 **Save and Compute Hand-Eye Calibration**，保存标定文件到当前路径下。
+- 记录多个位置之后单击 **Save and Compute Hand-Eye Calibration**，保存标定文件到当前路径下。
 - 所需物料：[aruco marker](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/aruco-100.svg) 以及可粘贴 [aruco marker 的支架](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/Unnamed2-M-COMA-340012-B_final_plate.stl)。
 

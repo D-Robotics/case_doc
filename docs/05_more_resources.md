@@ -2,7 +2,7 @@
 title: "参考资料"
 description: "RDK S600 大模型案例、算法工具链与用户手册等官方资料链接汇总。"
 sidebar_position: 5
-sidebar_label:  5. 参考资料
+sidebar_label: 5. 参考资料
 ---
 
 # 参考资料

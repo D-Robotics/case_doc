@@ -11,7 +11,7 @@ sidebar_label: 1. HoloBrain General Object Grasping
 
 | Platform | RDK S600 Ubuntu 24.04 |
 | :--- |:--- |
-| ROS Version | ROS2 Jazzy |
+| ROS Version | ROS 2 Jazzy |
 | Model | [HoloBrain_v0.0_GD](https://huggingface.co/HorizonRobotics/HoloBrain_v0.0_GD) |
 | Task | General object grasping |
 | Performance (DECODE = 5) | wall=116.823ms <br/> text=9.3007ms <br/> enc=40.2941ms <br/> dec=54.6188ms |
@@ -41,27 +41,27 @@ sidebar_label: 1. HoloBrain General Object Grasping
       <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-piper-arm.png" alt="AgileX Piper robotic arm" width="30%" /></td>
     </tr>
     <tr>
-      <td style={{ textAlign: 'left' }}>Realsense D435i</td>
+      <td style={{ textAlign: 'left' }}>RealSense D435i</td>
       <td style={{ textAlign: 'center' }}>3</td>
       <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-realsense-d435i.png" alt="Realsense D435i" width="30%" /></td>
     </tr>
     <tr>
-      <td style={{ textAlign: 'left' }}>Robotic arm stand</td>
+      <td style={{ textAlign: 'left' }}>Robotic Arm Stand</td>
       <td style={{ textAlign: 'center' }}>1</td>
       <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-arm-stand.png" alt="Robotic arm stand" width="30%" /></td>
     </tr>
     <tr>
-      <td style={{ textAlign: 'left' }}>Wrist camera 3D-printed mount</td>
+      <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_wrist_camera_mount.step">Wrist Camera 3D-Printed Mount</a></td>
       <td style={{ textAlign: 'center' }}>2</td>
       <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-wrist-camera-mount.png" alt="Wrist camera 3D-printed mount" width="30%" /></td>
     </tr>
     <tr>
-      <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_mid_camera_mount(low).step">Head camera 3D-printed mount</a></td>
+      <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_mid_camera_mount(low).step">Head Camera 3D-Printed Mount</a></td>
       <td style={{ textAlign: 'center' }}>1</td>
       <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-head-camera-mount.png" alt="Head camera 3D-printed mount" width="30%" /></td>
     </tr>
     <tr>
-      <td style={{ textAlign: 'left' }}>Small basket prop</td>
+      <td style={{ textAlign: 'left' }}>Small Basket Prop</td>
       <td style={{ textAlign: 'center' }}>1</td>
       <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-small-basket.png" alt="Small basket prop" width="30%" /></td>
     </tr>
