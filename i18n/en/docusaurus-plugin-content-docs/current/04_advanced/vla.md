@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: Vision-Language-Action Model (VLA)
+sidebar_label: 1. Vision-Language-Action Model (VLA)
 ---
 
 # Vision-Language-Action Model (VLA)

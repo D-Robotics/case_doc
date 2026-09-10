@@ -1,6 +1,6 @@
 ---
 sidebar_position: 3
-sidebar_label: 大语言模型（LLM）
+sidebar_label: 3. 大语言模型（LLM）
 ---
 
 # 大语言模型（LLM）

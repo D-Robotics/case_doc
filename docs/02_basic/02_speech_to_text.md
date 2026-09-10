@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: 语音转文字（ASR）
+sidebar_label: 2. 语音转文字（ASR）
 ---
 
 # 语音转文字（ASR）

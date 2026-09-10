@@ -13,7 +13,7 @@
 - `scripts/`：文档维护与构建辅助脚本（编号、链接修复、范围构建等）
 - `src/`：主题定制、插件与 remark 扩展
 - `static/`：静态资源
-- `.github/workflows/`：CI/CD 工作流（Pages 部署与 OSS 同步）
+- `.github/workflows/`：CI/CD 工作流（Pages 部署、OSS 同步、Algolia 索引更新）
 - `docusaurus.config.js`：站点主配置
 - `sidebars.js`：文档侧边栏配置入口
 

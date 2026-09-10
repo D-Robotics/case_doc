@@ -16,6 +16,7 @@ src/context/generated-sidebar-config.json
 
 # Misc
 .DS_Store
+.env
 .env.local
 
 # Local Pagefind artifacts (dev/temporary)
@@ -37,3 +38,11 @@ yarn.lock
 .idea
 
 .env.local
+
+# Local extract / migration work (not needed to run the site)
+.migration-work/
+pdf_extract.txt
+Thumbs.db
+
+# Algolia indexer local dumps / login artifacts
+scripts/_algolia_tmp/

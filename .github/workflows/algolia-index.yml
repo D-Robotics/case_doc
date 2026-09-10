@@ -1,0 +1,48 @@
+name: Update Algolia DocSearch index
+
+on:
+  workflow_run:
+    workflows: ["Sync gh-pages to OSS"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  algolia-index:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for live site
+        run: |
+          set -e
+          url="https://developer.d-robotics.cc/case_doc/case"
+          echo "Waiting for published site: $url"
+          for i in $(seq 1 18); do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" -A "case-doc-algolia-indexer/1.0" "$url" || true)
+            echo "attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Live site was not reachable with HTTP 200; indexing the currently published pages anyway."
+
+      - name: Crawl live site and update Algolia index
+        env:
+          ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+          ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+          ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
+          ALGOLIA_SITE_URL: ${{ vars.ALGOLIA_SITE_URL }}
+        run: |
+          if [ -z "$ALGOLIA_ADMIN_API_KEY" ]; then
+            echo "Missing repository secret ALGOLIA_ADMIN_API_KEY (Admin or Write API Key)."
+            exit 1
+          fi
+          npm run algolia:index

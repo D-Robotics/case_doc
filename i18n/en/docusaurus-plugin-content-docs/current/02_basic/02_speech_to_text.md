@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: Voice-to-Text (ASR)
+sidebar_label: 2. Voice-to-Text (ASR)
 ---
 
 # Voice-to-Text (ASR)

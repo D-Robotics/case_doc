@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: Object Detection
+sidebar_label: 1. Object Detection
 ---
 
 # Object Detection

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: USB Peripherals
+sidebar_label: 1. USB Peripherals
 ---
 
 # USB Peripherals

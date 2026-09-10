@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-sidebar_label: UART
+sidebar_label: 2. UART
 ---
 
 # UART

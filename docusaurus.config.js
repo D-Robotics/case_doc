@@ -28,7 +28,7 @@ const copyrightYearLabel =
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "RDK Cases DOC",
+  title: "RDK S600 Cases DOC",
   // tagline: 'Dinosaurs are cool',
   favicon: "img/logo.png",
   // trailingSlash: false,
@@ -277,23 +277,14 @@ const config = {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
       },
-    }),
-  themes: [
-    [
-      require.resolve("@easyops-cn/docusaurus-search-local"),
-      {
-        hashed: true,
-        language: ["en", "zh"],
-        highlightSearchTermsOnTargetPage: true,
-        explicitSearchResultPath: true,
-        docsRouteBasePath: ["/"],
-        indexDocs: true,
-        indexBlog: false,
-        indexPages: false,
-        searchResultContextMaxLength: 50,
+      algolia: {
+        appId: "1VU781LYTV",
+        apiKey: "fb65c6e54a52ce6fba0645bd2630e79b",
+        indexName: "case_doc",
+        contextualSearch: true,
+        searchPagePath: "search",
       },
-    ],
-  ],
+    }),
 };
 
 export default config;

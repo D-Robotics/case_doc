@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: 目标检测
+sidebar_label: 1. 目标检测
 ---
 
 # 目标检测

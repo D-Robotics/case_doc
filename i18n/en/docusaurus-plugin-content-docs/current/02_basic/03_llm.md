@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: Large Language Model (LLM)
+sidebar_label: 3. Large Language Model (LLM)
 ---
 
 # Large Language Model (LLM)

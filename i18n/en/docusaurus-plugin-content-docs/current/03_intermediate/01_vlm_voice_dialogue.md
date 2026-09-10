@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: Multimodal Interactive Assistant
+sidebar_label: 1. Multimodal Interactive Assistant
 ---
 
 # Multimodal Interactive Assistant
