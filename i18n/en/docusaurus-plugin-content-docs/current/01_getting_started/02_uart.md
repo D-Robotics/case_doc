@@ -1,4 +1,6 @@
 ---
+title: "UART"
+description: "How to connect and use UART on the RDK S600, with a bus-servo example."
 sidebar_position: 2
 sidebar_label: 2. UART
 ---

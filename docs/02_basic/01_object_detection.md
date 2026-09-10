@@ -1,4 +1,6 @@
 ---
+title: "目标检测"
+description: "在 RDK S600 上运行 YOLO 目标检测模型，覆盖环境准备、模型部署到效果验证的完整流程。"
 sidebar_position: 1
 sidebar_label: 1. 目标检测
 ---

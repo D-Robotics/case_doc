@@ -1,11 +1,13 @@
 ---
+title: "FAQ"
+description: "HoloBrain 通用物体抓取部署与使用过程中的常见问题与解决方法。"
 sidebar_position: 2
 sidebar_label: 2. FAQ
 ---
 
 # FAQ
 
-### Q1：执行 `apt` 命令找不到软件包怎么办？
+## Q1：执行 `apt` 命令找不到软件包怎么办？
 
 ```text
 E: Unable to locate package ...
@@ -17,7 +19,7 @@ E: Unable to locate package ...
 sudo apt update
 ```
 
-### Q2：执行 `ros2` 命令找不到命令怎么办？
+## Q2：执行 `ros2` 命令找不到命令怎么办？
 
 ```text
 ros2: command not found
@@ -31,7 +33,7 @@ source /opt/ros/jazzy/setup.bash
 source ros2_package/install/setup.bash
 ```
 
-### Q3：需要使用到 `can_left` 设备的时候找不到 `can_left` 设备怎么办？
+## Q3：需要使用到 `can_left` 设备的时候找不到 `can_left` 设备怎么办？
 
 **A：** 执行以下命令检查 CAN 设备。
 
@@ -50,7 +52,7 @@ can_left
 can_right
 ```
 
-### Q4：相机没有图像怎么办？
+## Q4：相机没有图像怎么办？
 
 **A：** 执行以下命令检查相机是否被正常识别。
 
@@ -73,7 +75,7 @@ ros2 topic info <image_topic> -v
 - Serial Number 是否配置正确
 - ROS 2 RealSense driver 是否正常启动
 
-### Q5：NumPy / OpenCV / SciPy 版本冲突怎么办？
+## Q5：NumPy / OpenCV / SciPy 版本冲突怎么办？
 
 **A：** 执行以下命令重新安装相关依赖。
 
@@ -85,13 +87,13 @@ pip install \
     "numpydantic<1.7"
 ```
 
-### Q6：如何标定左臂与中间摄像头的位置关系？ {#handeye-calib}
+## Q6：如何标定左臂与中间摄像头的位置关系？ {#handeye-calib}
 
 **A：** 
 - 参考 [标定教程](https://horizonrobotics.github.io/robot_lab/holobrain/real_env/modules/handeye_calib.html)。
 - 注意 `RoboOrchard/projects/HoloBrain/handeye_calib/launch_handeye_calib.sh` 脚本配置。
 - 启动 `./launch/start.sh` 之后，启动标定服务 `bash handeye_calib/launch_handeye_calib.sh`。
-- 短按机械臂上的按钮变为绿色，即可手动移动机械臂，移动至不同的位置并点击 **Record Current Pose**。
+- 短按机械臂上的按钮变为绿色，即可手动移动机械臂，移动至不同的位置并单击 **Record Current Pose**。
 - 记录多个位置之后点击 **Save and Compute Hand-Eye Calibration**，保存标定文件到当前路径下。
 - 所需物料：[aruco marker](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/aruco-100.svg) 以及可粘贴 [aruco marker 的支架](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/Unnamed2-M-COMA-340012-B_final_plate.stl)。
 

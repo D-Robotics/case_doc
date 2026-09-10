@@ -1,4 +1,6 @@
 ---
+title: "HoloBrain General Object Grasping"
+description: "Set up, deploy, and run HoloBrain general object grasping on the RDK S600."
 sidebar_position: 1
 sidebar_label: 1. HoloBrain General Object Grasping
 ---

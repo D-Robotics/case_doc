@@ -1,5 +1,7 @@
 ---
-sidebar_position: 1
+title: "Large Language Model (LLM)"
+description: "Deploy a Qwen large language model on the RDK S600 for on-device text Q&A and generation."
+sidebar_position: 3
 sidebar_label: 3. Large Language Model (LLM)
 ---
 

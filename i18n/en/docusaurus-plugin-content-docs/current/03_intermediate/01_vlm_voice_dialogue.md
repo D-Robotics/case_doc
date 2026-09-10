@@ -1,4 +1,6 @@
 ---
+title: "Multimodal Interactive Assistant"
+description: "Build a voice-and-vision multimodal interactive assistant on the RDK S600 by combining ASR and VLM."
 sidebar_position: 1
 sidebar_label: 1. Multimodal Interactive Assistant
 ---

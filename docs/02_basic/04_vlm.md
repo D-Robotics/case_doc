@@ -1,4 +1,6 @@
 ---
+title: "视觉语言模型（VLM）"
+description: "在 RDK S600 上部署 Qwen3VL 视觉语言模型，实现看图问答等多模态交互。"
 sidebar_position: 4
 sidebar_label: 4. 视觉语言模型（VLM）
 ---

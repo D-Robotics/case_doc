@@ -1,4 +1,6 @@
 ---
+title: "视觉语言动作模型（VLA）"
+description: "在 RDK S600 与 PC 仿真环境上部署 Pi0 视觉语言动作模型，实现端到端机器人控制。"
 sidebar_position: 1
 sidebar_label: 1. 视觉语言动作模型（VLA）
 ---

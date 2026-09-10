@@ -1,4 +1,6 @@
 ---
+title: "语音转文字（ASR）"
+description: "在 RDK S600 上部署 Whisper 语音转文字模型，实现实时语音识别。"
 sidebar_position: 2
 sidebar_label: 2. 语音转文字（ASR）
 ---

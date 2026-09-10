@@ -1,6 +1,7 @@
 ---
+title: "RDK S600 应用案例手册"
+description: "汇总 RDK S600 平台从基础外设接入到端侧 AI 推理、多模态交互与具身智能的典型应用案例。"
 sidebar_position: 1
-slug: /case
 ---
 
 # RDK S600 应用案例手册

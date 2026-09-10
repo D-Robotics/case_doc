@@ -1,4 +1,6 @@
 ---
+title: "多模态交互助手"
+description: "结合 ASR 与 VLM，在 RDK S600 上构建语音与视觉的多模态交互助手。"
 sidebar_position: 1
 sidebar_label: 1. 多模态交互助手
 ---

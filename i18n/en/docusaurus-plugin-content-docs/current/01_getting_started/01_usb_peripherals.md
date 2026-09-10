@@ -1,4 +1,6 @@
 ---
+title: "USB Peripherals"
+description: "How to connect and use USB serial, camera, and audio peripherals on the RDK S600, with example applications."
 sidebar_position: 1
 sidebar_label: 1. USB Peripherals
 ---

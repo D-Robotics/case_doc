@@ -1,9 +1,11 @@
 ---
+title: "参考资料"
+description: "RDK S600 大模型案例、算法工具链与用户手册等官方资料链接汇总。"
 sidebar_position: 5
 sidebar_label:  5. 参考资料
 ---
 
-# 5. 参考资料
+# 参考资料
 
 1. 更详细的大模型案例说明见 [RDK S600 LLM 文档](https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/toolchain_development/LLM_Toolchain/s600_LLM_Toolchain?v=5.1.0&p=RDK+S600)
 

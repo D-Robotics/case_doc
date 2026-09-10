@@ -1,4 +1,6 @@
 ---
+title: "HoloBrain 通用物体抓取"
+description: "在 RDK S600 上完成 HoloBrain 通用物体抓取的环境配置、模型部署与任务运行。"
 sidebar_position: 1
 sidebar_label: 1. HoloBrain 通用物体抓取
 ---
@@ -36,7 +38,7 @@ sidebar_label: 1. HoloBrain 通用物体抓取
     <tr>
       <td style={{ textAlign: 'left' }}>松灵 Piper 机械臂</td>
       <td style={{ textAlign: 'center' }}>2</td>
-      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-piper-arm.png" alt="松灵Piper机械臂" width="30%" /></td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-piper-arm.png" alt="松灵 Piper 机械臂" width="30%" /></td>
     </tr>
     <tr>
       <td style={{ textAlign: 'left' }}>Realsense D435i</td>
@@ -97,7 +99,7 @@ rs-enumerate-devices | grep Serial
 
 #### 调整中间摄像头位置
 
-另外中间摄像头与左臂的变换关系如下，为保证效果，请调整中间摄像头位置，尽可能接近下图中摄像头和左臂的变换关系（position）。若需要确定实际变换关系，可参考 [FAQ](./faq) 中的标定教程
+另外中间摄像头与左臂的变换关系如下，为保证效果，请调整中间摄像头位置，尽可能接近下图中摄像头和左臂的变换关系（position）。若需要确定实际变换关系，可参考 [FAQ](./faq) 中的标定教程。
 
 <img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-middle-camera-transform.png" alt="中间摄像头与左臂变换关系" width="40%"/>
 
@@ -372,7 +374,7 @@ DECODER_STEPS=5 sh run_hbm_http_server.sh
     ./launch/start.sh
     ```
 
-2. 启动后可看到以下界面，点击界面底部的窗口号，可查看各功能的运行情况，请确保各功能运行正常。
+2. 启动后可看到以下界面，单击界面底部的窗口号，可查看各功能的运行情况，请确保各功能运行正常。
 
     <img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-tmux-runtime.png" alt="HoloBrain tmux 运行界面" />
 
