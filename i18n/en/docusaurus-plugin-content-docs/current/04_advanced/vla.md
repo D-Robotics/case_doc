@@ -1,4 +1,6 @@
 ---
+title: "Vision-Language-Action Model (VLA)"
+description: "Deploy the Pi0 vision-language-action model on the RDK S600 and in PC simulation for end-to-end robot control."
 sidebar_position: 1
 sidebar_label: 1. Vision-Language-Action Model (VLA)
 ---
@@ -373,6 +375,6 @@ step: 1 / 400
 ...
 ```
 
-![](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/vla_effect.png)
+![VLA run result](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/vla_effect.png)
 
 

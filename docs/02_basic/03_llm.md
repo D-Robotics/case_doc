@@ -1,4 +1,6 @@
 ---
+title: "大语言模型（LLM）"
+description: "在 RDK S600 上部署 Qwen 大语言模型，实现端侧文本问答与生成。"
 sidebar_position: 3
 sidebar_label: 3. 大语言模型（LLM）
 ---

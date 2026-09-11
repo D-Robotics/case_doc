@@ -1,9 +1,11 @@
 ---
+title: "References"
+description: "Links to official RDK S600 LLM cases, the algorithm toolchain, and user manuals."
 sidebar_position: 5
 sidebar_label: 5. References
 ---
 
-# 5. References
+# References
 
 1. For more detailed LLM case descriptions, see the [RDK S600 LLM Documentation](https://developer.d-robotics.cc/rdk_s_doc/en/Advanced_development/toolchain_development/LLM_Toolchain/s600_LLM_Toolchain?v=5.1.0&p=RDK+S600)
 

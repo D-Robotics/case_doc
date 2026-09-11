@@ -1,5 +1,7 @@
 ---
-sidebar_position: 2
+title: "Vision-Language Model (VLM)"
+description: "Deploy a Qwen3VL vision-language model on the RDK S600 for image Q&A and multimodal interaction."
+sidebar_position: 4
 sidebar_label: 4. Vision-Language Model (VLM)
 ---
 

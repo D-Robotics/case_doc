@@ -1,5 +1,7 @@
 ---
-sidebar_position: 1
+title: "Voice-to-Text (ASR)"
+description: "Deploy a Whisper speech-to-text model on the RDK S600 for real-time speech recognition."
+sidebar_position: 2
 sidebar_label: 2. Voice-to-Text (ASR)
 ---
 

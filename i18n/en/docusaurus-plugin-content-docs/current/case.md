@@ -1,6 +1,7 @@
 ---
+title: "RDK S600 Application Cases Manual"
+description: "A collection of typical RDK S600 application cases, from basic peripherals to on-device AI, multimodal interaction, and embodied intelligence."
 sidebar_position: 1
-slug: /case
 ---
 
 # RDK S600 Application Cases Manual
@@ -29,7 +30,7 @@ Deploy entry-level AI models on the S600 device, covering vision, audio, and LLM
 
 Combines multiple modality capabilities to build interaction experiences closer to real products.
 
-- **[Multimodal Interactive Assistant)](/intermediate/vlm_voice_dialogue)**: Combines Whisper-medium and Qwen3VL-8B with a USB microphone and camera for "voice + vision" multimodal dialogue—for example, asking "What do you see?"
+- **[Multimodal Interactive Assistant](/intermediate/vlm_voice_dialogue)**: Combines Whisper-medium and Qwen3VL-8B with a USB microphone and camera for "voice + vision" multimodal dialogue—for example, asking "What do you see?"
 
 ### 4. Advanced Cases
 

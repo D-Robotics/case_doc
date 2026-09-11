@@ -1,4 +1,6 @@
 ---
+title: "HoloBrain 通用物体抓取"
+description: "在 RDK S600 上完成 HoloBrain 通用物体抓取的环境配置、模型部署与任务运行。"
 sidebar_position: 1
 sidebar_label: 1. HoloBrain 通用物体抓取
 ---
@@ -9,7 +11,7 @@ sidebar_label: 1. HoloBrain 通用物体抓取
 
 | 适用平台 | RDK S600 Ubuntu 24.04 |
 | :--- |:--- |
-| ROS 版本 | ROS2 Jazzy |
+| ROS 版本 | ROS 2 Jazzy |
 | 模型 | [HoloBrain_v0.0_GD](https://huggingface.co/HorizonRobotics/HoloBrain_v0.0_GD) |
 | 任务 | 通用物体抓取 |
 | 性能（DECODE = 5） | wall=116.823ms <br/> text=9.3007ms <br/> enc=40.2941ms <br/> dec=54.6188ms |
@@ -36,10 +38,10 @@ sidebar_label: 1. HoloBrain 通用物体抓取
     <tr>
       <td style={{ textAlign: 'left' }}>松灵 Piper 机械臂</td>
       <td style={{ textAlign: 'center' }}>2</td>
-      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-piper-arm.png" alt="松灵Piper机械臂" width="30%" /></td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-piper-arm.png" alt="松灵 Piper 机械臂" width="30%" /></td>
     </tr>
     <tr>
-      <td style={{ textAlign: 'left' }}>Realsense D435i</td>
+      <td style={{ textAlign: 'left' }}>RealSense D435i</td>
       <td style={{ textAlign: 'center' }}>3</td>
       <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-realsense-d435i.png" alt="Realsense D435i" width="30%" /></td>
     </tr>
@@ -51,12 +53,12 @@ sidebar_label: 1. HoloBrain 通用物体抓取
     <tr>
       <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_wrist_camera_mount.step">手部相机 3D 打印件</a></td>
       <td style={{ textAlign: 'center' }}>2</td>
-      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-wrist-camera-mount.png" alt="手部相机3D打印件" width="30%" /></td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-wrist-camera-mount.png" alt="手部相机 3D 打印件" width="30%" /></td>
     </tr>
     <tr>
       <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_mid_camera_mount(low).step">头部相机 3D 打印件</a></td>
       <td style={{ textAlign: 'center' }}>1</td>
-      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-head-camera-mount.png" alt="头部相机3D打印件" width="30%" /></td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-head-camera-mount.png" alt="头部相机 3D 打印件" width="30%" /></td>
     </tr>
     <tr>
       <td style={{ textAlign: 'left' }}><a href="https://detail.tmall.com/item.htm?id=988515313979&mi_id=0000Kn0iHY9KaNACPRX0Uq7AJV4s4laPFF9Om5RV51ZlW1o&spm=tbpc.boughtlist.suborder_itemtitle.1.53352e8dwPWQLy">篮子道具-小号</a></td>
@@ -97,7 +99,7 @@ rs-enumerate-devices | grep Serial
 
 #### 调整中间摄像头位置
 
-另外中间摄像头与左臂的变换关系如下，为保证效果，请调整中间摄像头位置，尽可能接近下图中摄像头和左臂的变换关系（position）。若需要确定实际变换关系，可参考 [FAQ](./faq) 中的标定教程
+另外中间摄像头与左臂的变换关系如下，为保证效果，请调整中间摄像头位置，尽可能接近下图中摄像头和左臂的变换关系（position）。若需要确定实际变换关系，可参考 [FAQ](./faq) 中的标定教程。
 
 <img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-middle-camera-transform.png" alt="中间摄像头与左臂变换关系" width="40%"/>
 
@@ -372,7 +374,7 @@ DECODER_STEPS=5 sh run_hbm_http_server.sh
     ./launch/start.sh
     ```
 
-2. 启动后可看到以下界面，点击界面底部的窗口号，可查看各功能的运行情况，请确保各功能运行正常。
+2. 启动后可看到以下界面，单击界面底部的窗口号，可查看各功能的运行情况，请确保各功能运行正常。
 
     <img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-tmux-runtime.png" alt="HoloBrain tmux 运行界面" />
 
@@ -382,7 +384,7 @@ DECODER_STEPS=5 sh run_hbm_http_server.sh
 
     <img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-web-ui.png" alt="Horizon Robotics Lab Info 界面" />
 
-5. 选择完成后，点击 **Start** 开始任务，**Stop** 停止任务，**Reset** 可让机械臂归到零位。
+5. 选择完成后，单击 **Start** 开始任务，**Stop** 停止任务，**Reset** 可让机械臂归到零位。
 
   
 

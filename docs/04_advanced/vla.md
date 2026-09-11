@@ -1,11 +1,13 @@
 ---
+title: "视觉语言动作模型（VLA）"
+description: "在 RDK S600 与 PC 仿真环境上部署 Pi0 视觉语言动作模型，实现端到端机器人控制。"
 sidebar_position: 1
 sidebar_label: 1. 视觉语言动作模型（VLA）
 ---
 
 # 视觉语言动作模型（VLA）
 
-VLA（Vision-Language-Action Model，视觉-语言-动作模型）是一种融合视觉理解、语言交互与机器人控制能力的端到端模型，可根据视觉信息和语言指令直接生成机器人动作，广泛应用于具身智能与机器人操作场景。代表工作有 Google 的 RT-2 和 Physical Intelligence 的 pi0。
+VLA（Vision-Language-Action Model，视觉-语言-动作模型）是一种融合视觉理解、语言交互与机器人控制能力的端到端模型，可根据视觉信息和语言指令直接生成机器人动作，广泛应用于具身智能与机器人操作场景。代表工作有 Google 的 RT-2 和 Physical Intelligence 的 Pi0。
 
 | 硬件要求 | 算法依赖 | 性能 Benchmark |
 | --- | --- | --- |
@@ -15,7 +17,7 @@ VLA（Vision-Language-Action Model，视觉-语言-动作模型）是一种融�
 
 - 在 S600 部署 Pi0 模型，用于端侧推理并统计耗时。
 
-- 如需部署自训练的 pi0 模型或进行实机联调部署，请参阅[参考资料](/more_resources)。
+- 如需部署自训练的 Pi0 模型或进行实机联调部署，请参阅[参考资料](/more_resources)。
 
 该流程体验需要搭建 PC 端仿真环境，交互流程如下：
 
@@ -91,7 +93,7 @@ bash download.sh
 
 :::warning
 
-- **curboro 安装失败**
+- **curobo 安装失败**
 
  尝试 `export CUROBO_DISABLE_CUDA_EXT=1` 然后执行 `pip install -e . --no-build-isolation # 耗时较久`
 
@@ -373,7 +375,7 @@ step: 1 / 400
 ...
 ```
 
-![](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/vla_effect.png)
+![VLA 运行效果](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/vla_effect.png)
 
 
 

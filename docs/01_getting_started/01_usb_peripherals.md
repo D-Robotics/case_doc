@@ -1,4 +1,6 @@
 ---
+title: "USB 外设使用"
+description: "介绍 USB 串口、摄像头、音频等外设在 RDK S600 上的接入与使用方法，并给出相应示例应用。"
 sidebar_position: 1
 sidebar_label: 1. USB 外设使用
 ---

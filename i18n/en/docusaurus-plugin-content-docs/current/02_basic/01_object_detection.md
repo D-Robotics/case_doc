@@ -1,4 +1,6 @@
 ---
+title: "Object Detection"
+description: "Run a YOLO object-detection model on the RDK S600, from environment setup to model deployment and verification."
 sidebar_position: 1
 sidebar_label: 1. Object Detection
 ---

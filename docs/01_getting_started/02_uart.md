@@ -1,4 +1,6 @@
 ---
+title: "UART 使用"
+description: "介绍 UART 串口在 RDK S600 上的接入与使用方法，并以总线舵机为例演示串口通信。"
 sidebar_position: 2
 sidebar_label: 2. UART 使用
 ---

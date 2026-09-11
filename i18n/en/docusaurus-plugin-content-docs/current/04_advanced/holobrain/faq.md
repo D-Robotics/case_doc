@@ -1,11 +1,13 @@
 ---
+title: "FAQ"
+description: "Common issues and solutions for deploying and using HoloBrain general object grasping."
 sidebar_position: 2
 sidebar_label: 2. FAQ
 ---
 
 # FAQ
 
-### Q1: What if `apt` cannot locate a package?
+## Q1: What if `apt` cannot locate a package?
 
 ```text
 E: Unable to locate package ...
@@ -17,7 +19,7 @@ E: Unable to locate package ...
 sudo apt update
 ```
 
-### Q2: What if the `ros2` command is not found?
+## Q2: What if the `ros2` command is not found?
 
 ```text
 ros2: command not found
@@ -31,7 +33,7 @@ source /opt/ros/jazzy/setup.bash
 source ros2_package/install/setup.bash
 ```
 
-### Q3: What if the `can_left` device is missing when you need it?
+## Q3: What if the `can_left` device is missing when you need it?
 
 **A:** Check CAN devices with the following commands.
 
@@ -50,7 +52,7 @@ can_left
 can_right
 ```
 
-### Q4: What if the camera has no image?
+## Q4: What if the camera has no image?
 
 **A:** Check whether the camera is recognized with the following commands.
 
@@ -73,7 +75,7 @@ Key checks:
 - Serial Number is configured correctly
 - ROS 2 RealSense driver is running normally
 
-### Q5: What if there is a NumPy / OpenCV / SciPy version conflict?
+## Q5: What if there is a NumPy / OpenCV / SciPy version conflict?
 
 **A:** Reinstall the related dependencies with the following commands.
 
@@ -85,7 +87,7 @@ pip install \
     "numpydantic<1.7"
 ```
 
-### Q6: How do I calibrate the pose relationship between the left arm and the middle camera? {#handeye-calib}
+## Q6: How do I calibrate the pose relationship between the left arm and the middle camera? {#handeye-calib}
 
 **A:**
 - See the [calibration tutorial](https://horizonrobotics.github.io/robot_lab/holobrain/real_env/modules/handeye_calib.html).
