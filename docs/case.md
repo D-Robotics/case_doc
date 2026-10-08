@@ -37,7 +37,7 @@ sidebar_position: 1
 面向具身智能场景，展示视觉-语言-动作（VLA）模型的端侧部署、PC 仿真联调，以及 HoloBrain 实机抓取部署。
 
 - **[视觉语言动作模型（VLA）](/advanced/vla)**：在 PC 端部署 RoboTwin 仿真环境，在 S600 端侧部署 Pi0 模型进行推理，涵盖 PC 仿真部署、S600 端侧部署与运行结果展示。
-- **[HoloBrain](/advanced/holobrain)**：在 RDK S600 上完成 HoloBrain 环境配置、模型部署与通用物体抓取任务运行，涵盖硬件准备、环境搭建、启动停止；常见问题见 [FAQ](/advanced/holobrain/faq)。
+- **[HoloBrain](/advanced/holobrain)**：在 RDK S600 上完成 HoloBrain 环境配置、模型部署与通用物体抓取任务运行，涵盖硬件准备、环境搭建、启动停止。常见问题见 [FAQ](/advanced/holobrain/faq)。
 
 ### 5. 参考资料
 

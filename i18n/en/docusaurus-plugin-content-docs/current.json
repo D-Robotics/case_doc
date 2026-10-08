@@ -59,6 +59,10 @@
     "message": "4.1.1 Vision-Language-Action Model",
     "description": "The label for category 4.1.1 视觉-语言-动作模型 in sidebar docsSidebar"
   },
+  "sidebar.docsSidebar.category.3. 视觉语言动作模型（Pi0 / Pi05）": {
+    "message": "3. Vision-Language-Action Models (Pi0 / Pi05)",
+    "description": "The label for category 3. 视觉语言动作模型（Pi0 / Pi05） in sidebar docsSidebar"
+  },
   "sidebar.docsSidebar.category.2. 初阶案例": {
     "message": "2. Basic Cases",
     "description": "The label for category 2. 初阶案例 in sidebar docsSidebar"
