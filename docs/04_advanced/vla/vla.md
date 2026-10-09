@@ -1,11 +1,11 @@
 ---
-title: "视觉语言动作模型（VLA）"
+title: "Pi0 敲木块（仿真）"
 description: "在 RDK S600 与 PC 仿真环境上部署 Pi0 视觉语言动作模型，实现端到端机器人控制。"
 sidebar_position: 1
-sidebar_label: 1. 视觉语言动作模型（VLA）
+sidebar_label: 1. Pi0 敲木块（仿真）
 ---
 
-# 视觉语言动作模型（VLA）
+# Pi0 敲木块（仿真）
 
 VLA（Vision-Language-Action Model，视觉-语言-动作模型）是一种融合视觉理解、语言交互与机器人控制能力的端到端模型，可根据视觉信息和语言指令直接生成机器人动作，广泛应用于具身智能与机器人操作场景。代表工作有 Google 的 RT-2 和 Physical Intelligence 的 Pi0。
 

@@ -34,15 +34,17 @@ Combines multiple modality capabilities to build interaction experiences closer 
 
 ### 4. Advanced Cases
 
-For embodied intelligence scenarios, demonstrating on-device VLA (Vision-Language-Action) model deployment, PC simulation co-debugging, and HoloBrain real-robot grasping.
+For embodied intelligence scenarios, demonstrating PC simulation co-debugging and on-device deployment of the VLA (Vision-Language-Action) model, plus real-robot cases such as HoloBrain general object grasping and Pi0 & Pi05 towel folding.
 
-- **[Vision-Language-Action Model (VLA)](/advanced/vla)**: Deploy the RoboTwin simulation environment on PC and the Pi0 model on S600 for inference, covering PC simulation deployment, S600 on-device deployment, and run results.
-- **[HoloBrain](/advanced/holobrain)**: Configure the HoloBrain environment on RDK S600, deploy the model, and run a general object-grasping task, covering hardware setup, environment setup, and start/stop. See [FAQ](/advanced/holobrain/faq) for common issues.
+- **[Vision-Language-Action Model (VLA)](/04_advanced/vla)**: Overview of the VLA cases, covering the three cases below.
+  - **[Pi0 Hammer the Block (Simulation)](/advanced/vla)**: Deploy the RoboTwin simulation environment on PC and the Pi0 model on S600 for inference, covering PC simulation deployment, S600 on-device deployment, and run results.
+  - **[HoloBrain General Object Grasping (Real Robot)](/advanced/vla/holobrain)**: Configure the HoloBrain environment on RDK S600, deploy the model, and run a general object-grasping task, covering hardware setup, environment setup, and start/stop. See [FAQ](/advanced/vla/holobrain#faq) for common issues.
+  - **[Pi0 & Pi05 Fold the Towel (Real Robot)](/advanced/vla/pi0_pi05)**: Train Pi0 and Pi05 for the towel-folding task with LeRobot, quantize and compile with OELLM2.0, and deploy and run on-device; the training and deployment flow is covered in the [Pi0](/advanced/vla/pi0_pi05/pi0) and [Pi05](/advanced/vla/pi0_pi05/pi05) pages.
 
 ### 5. More Resources
 
-Provides SDK documentation, quantization toolchain, S600 user manual, and extended reading on Pi0 quantization and real-robot deployment.
+Provides SDK documentation, quantization toolchain, S600 user manual, and extended reading on Pi0 quantization and real-robot deployment; see [References](/more_resources).
 
 ### 6. FAQ
 
-Common issues encountered in practice, such as BPU memory allocation failures and HBM model format errors, with troubleshooting steps and solutions.
+Common issues encountered in practice, such as BPU memory allocation failures and HBM model format errors, with troubleshooting steps and solutions; see [FAQ](/qa).

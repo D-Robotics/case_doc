@@ -1,38 +1,50 @@
 ---
-title: "Pi05"
-description: "The complete pipeline for the Pi05 vision-language-action model, from LeRobot training and OELLM2.0 quantization and compilation to on-device deployment on the RDK S600, with troubleshooting."
-sidebar_position: 3
-sidebar_label: 2. Pi05
+title: "Pi0"
+description: "The complete pipeline for the Pi0 vision-language-action model, from LeRobot training and OELLM2.0 quantization and compilation to on-device deployment on the RDK S600, with troubleshooting."
+sidebar_position: 2
+sidebar_label: 1. Pi0
 ---
 
-# Pi05
+# Pi0
+
 
 ## Workflow overview
 
 ```text
-[Stage 1] Training
-   pi05_base  (HF pretrained)
+Training
+   pi0_base  (HF pretrained)
         │  finetune  (v3.0 dataset, 30 fps)
         ▼
    checkpoints/030000/pretrained_model  (bf16, chunk=50, absolute actions)
 
         │
         ▼
-[Stage 2] Quantization + compilation (oe_llm_s600/pi05_conver/)
+Quantization + compilation (oe_llm_s600/pi0_conver/)
    float_eval  → floating-point baseline / reference dump
-   calib       → fake-quant weights + time-mod LUT
+   calib       → fake-quant weights (pi0 has no time-mod LUT)
    calib_eval  → fake-quant accuracy (calibration set)
    compile     → 3× HBM (w8 nash-p)
 
         │
         ▼
-[Stage 3] On-device deployment and running
+On-device deployment and running
    3× HBM + norm_stats_runtime.json + tokenizer/
    server (vla_sdk_demo) + client (vla_robot)
 ```
 
-- Model: PaliGemma (gemma_2b) + Gemma action expert (gemma_300m), 3 cameras + 14-dim state/action, chunk=50, 10 denoising steps.
-- Quantization: int8 weights (w8) + fake-quant calibration, compiled to nash-p HBM.
+- Model: PaliGemma (gemma_2b) + Gemma action expert (gemma_300m), 3 cameras + 14-dim state/action (padded to 32), chunk=50, 10 denoising steps.
+- Quantization: int8 weights (w8) / action expert W8A16, compiled to nash-p HBM.
+- The pi0 model/pipeline code lives in pi0_pkg and hooks into the framework through runtime registration + monkey-patching.
+
+
+## Results
+
+<video controls width="100%" preload="metadata">
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-effect.mp4" type="video/mp4" />
+ Your browser does not support the video tag.
+</video>
+
+
 
 ## Get the toolkit
 
@@ -40,7 +52,7 @@ sidebar_label: 2. Pi05
 wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_toolkit.tar.gz
 ```
 
-## Stage 1: Training (LeRobot pi05)
+## Training
 
 Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
 
@@ -73,15 +85,15 @@ Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
 
     - Training depends on two Hugging Face resources:
 
-      - The pretrained weights `lerobot/pi05_base`, and the tokenizer `google/paligemma-3b-pt-224` that `tokenizer_name` points to in its `policy_preprocessor.json`. If you can access Hugging Face and do not set `HF_HUB_OFFLINE=1` during training, you do not need to download them in advance; `lerobot-train` pulls them automatically by repository name. The training command below sets `HF_HUB_OFFLINE=1`, so you must complete the local preparation first.
+      - The pretrained weights `lerobot/pi0_base`, and the tokenizer `google/paligemma-3b-pt-224` that `tokenizer_name` points to in its `policy_preprocessor.json`. If you can access Hugging Face and do not set `HF_HUB_OFFLINE=1` during training, you do not need to download them in advance; `lerobot-train` pulls them automatically by repository name. The training command below sets `HF_HUB_OFFLINE=1`, so you must complete the local preparation first.
 
       - `google/paligemma-3b-pt-224` is a gated model, so you must be granted access before downloading it: sign in to [Hugging Face](https://huggingface.co), open [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224), click Acknowledge license to accept the Gemma license (this takes effect immediately), then run `hf auth login`.
 
-    - If your network is poor, or the training command sets `HF_HUB_OFFLINE=1` (which reads only local files and no longer contacts Hugging Face), download everything in advance under the `lerobot` directory. Use `./pi05_base` as `--policy.pretrained_path`; after downloading, change `tokenizer_name` in `pi05_base/policy_preprocessor.json` to `./paligemma-3b-pt-224`.
+    - If your network is poor, or the training command sets `HF_HUB_OFFLINE=1` (which reads only local files and no longer contacts Hugging Face), download everything in advance under the `lerobot` directory. Use `./pi0_base` as `--policy.pretrained_path`; after downloading, change `tokenizer_name` in `pi0_base/policy_preprocessor.json` to `./paligemma-3b-pt-224`.
 
       ```bash
       cd lerobot
-      hf download lerobot/pi05_base --local-dir ./pi05_base
+      hf download lerobot/pi0_base --local-dir ./pi0_base
       hf download google/paligemma-3b-pt-224 --local-dir ./paligemma-3b-pt-224
       ```
 
@@ -100,37 +112,42 @@ Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
 cd lerobot
 conda activate lerobot
 
-# Fine-tune from pi05_base (use rename_map if the dataset needs remapping)
+# Fine-tune from pi0_base (use rename_map if the dataset needs remapping)
 HF_HUB_OFFLINE=1 lerobot-train \
-  --dataset.repo_id=D-Robotics/fold_the_towel_remap_v3 \
-  --dataset.root=<...>/fold_the_towel_remap_v3 \
-  --policy.type=pi05 \
-  --output_dir=./outputs/pi05_training --job_name=pi05_training \
-  --policy.pretrained_path=./pi05_base \
-  --policy.gradient_checkpointing=true --policy.dtype=bfloat16 \
-  --policy.freeze_vision_encoder=true --policy.train_expert_only=true \
-  --policy.n_action_steps=10 \
-  --policy.normalization_mapping='{"ACTION":"MEAN_STD","STATE":"MEAN_STD","VISUAL":"IDENTITY"}' \
-  --policy.device=cuda \
-  --batch_size=32 --num_workers=1 --steps=30000 --save_freq=5000 --seed=1000 \
-  --wandb.enable=true \
-  --wandb.project=pi05_training \
-  --rename_map '{"state":"observation.state","head_cam":"observation.images.head_cam",
+    --dataset.repo_id=D-Robotics/fold_the_towel_remap_v3 \
+    --dataset.root=<...>/fold_the_towel_remap_v3 \
+    --policy.type=pi0 \
+    --output_dir=./outputs/pi0_training \
+    --job_name=pi0_training \
+    --policy.pretrained_path=./pi0_base \
+    --policy.compile_model=true \
+    --policy.gradient_checkpointing=true \
+    --policy.dtype=bfloat16 \
+    --policy.freeze_vision_encoder=false \
+    --policy.train_expert_only=false \
+    --policy.push_to_hub=false \
+    --steps=30000 \
+    --policy.device=cuda \
+    --batch_size=32 \
+    --rename_map '{"state":"observation.state","head_cam":"observation.images.head_cam",
 "left_cam":"observation.images.left_cam","right_cam":"observation.images.right_cam"}'
 
 # To resume from a checkpoint, refer to the following command:
 HF_HUB_OFFLINE=1 lerobot-train \
-  --config_path=outputs/pi05_training/checkpoints/030000/pretrained_model \
+  --config_path=outputs/pi0_training/checkpoints/030000/pretrained_model \
   --resume=true --steps=60000 --dataset.eval_split=0.05 --eval_steps=1000
 ```
 
-#### Key configuration (`train_config.json` / `config.json`)
+**Key configuration**
+
+**train_config.json** / **config.json**
 
 | Item | Value |
 | :--- | :--- |
-| policy | pi05 (gemma_2b + gemma_300m) |
-| batch / steps | 32 / 30000 |
-| lr | AdamW 2.5e-5, cosine + warmup1000 |
+| policy | pi0 (gemma_2b + gemma_300m) |
+| batch | 32 |
+| steps | 30000 |
+| lr | AdamW 2.5e-5<br />cosine + warmup 1000<br />decay 30000 |
 | dtype | bfloat16<br />compile_model=true<br />compile_mode=max-autotune |
 | freeze | true |
 | train_expert_only | true |
@@ -140,21 +157,22 @@ HF_HUB_OFFLINE=1 lerobot-train \
 | tokenizer | tokenizer_max_length=48 |
 | Deployment | type=pi0<br />chunk_size=50<br />n_action_steps=50<br />num_inference_steps=10<br />compile_model=true<br />image_resolution=\[224,224\]<br />use_relative_actions=false<br />control_fps=30 |
 
-#### Training resources and time
+**Training resources and time**
 
 | Item | Value |
 | :--- | :--- |
 | Machine | 1× NVIDIA RTX 5090 32GB (32607 MiB, driver 610.57.04) + Intel i9-14900KF (32 threads) |
-| GPU memory usage | ~21.9 GB |
+| GPU memory usage | ~10.5 GB |
 | batch | 32 |
 | Precision | bfloat16 |
-| Memory optimization | gradient_checkpointing=true<br />freeze_vision_encoder=true<br />train_expert_only=true |
-| Time per step | ~3.77 s/step |
-| Measured throughput including eval/save | ~4.08 s/step |
+| Memory optimization | gradient_checkpointing=true<br />freeze_vision_encoder=true<br />train_expert_only=true<br />compile_model=true (max-autotune) |
+| Trainable parameters | 578M (only the action expert is unfrozen) |
+| Time per step | ~1.92 s/step |
+| Measured throughput including eval/save | ~2.30 s/step |
 | Training steps | 30000 |
 | Data duration | 35s |
 | Number of samples | 300 |
-| Time for this stage | ≈ 31-34 h |
+| Time for this stage | ≈ 16.3 h |
 
 ### Dataset format: v2.1 vs v3.0
 
@@ -163,7 +181,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 The training environment lerobot (0.6.2, CODEBASE_VERSION=v3.0) can read only v3.0.
 :::
 
-#### v2.1 — fold_the_towel
+**v2.1 — fold_the_towel**
 
 ```text
 .
@@ -184,7 +202,7 @@ The training environment lerobot (0.6.2, CODEBASE_VERSION=v3.0) can read only v3
         └── right_cam/episode_000000.mp4
 ```
 
-#### v3.0 — fold_the_towel_v3
+**v3.0 — fold_the_towel_v3**
 
 ```text
 .
@@ -205,7 +223,7 @@ The training environment lerobot (0.6.2, CODEBASE_VERSION=v3.0) can read only v3
     └── right_cam/chunk-000/file-000.mp4
 ```
 
-#### Key differences
+**Key differences**
 
 | Item | v2.1 | v3.0 |
 | :--- | :--- | :--- |
@@ -224,7 +242,7 @@ The training environment lerobot (0.6.2, CODEBASE_VERSION=v3.0) can read only v3
 
 :::
 
-## Stage 2: Quantization + compilation (OELLM2.0)
+## Quantization and compilation
 
 ### Environment setup
 
@@ -235,24 +253,34 @@ pip install $SDK/package/host/*.whl          # horizon / hbdk / hbm
 pip install -r $SDK/llm_compression/requirements.txt
 pip install --force-reinstall setuptools==80.10.2
 
-# Create the pi05_conver folder; put the files needed for quantization and the generated artifacts in it
-mkdir oe_llm_s600/pi05_conver
+# Create the pi0_conver folder; put the files needed for quantization and the generated artifacts in it
+mkdir oe_llm_s600/pi0_conver
 ```
+
+Quantization package `pi0_toolkit/quantize/pi0_pkg/`
+
+| File | Purpose |
+| :--- | :--- |
+| model.py | Pi0Config + Pi0GemmaExpert (state_proj / action_time_mlp / standard RMSNorm) |
+| process_utils.py | Denoising loop with state + expert attention mask/position_ids (\_SUFFIX_STATE_TOKENS=1) |
+| pi0_model.py | Pi0 QModel (@MODEL_REGISTRY runtime registration; get_qconfig_setting("action") defines the quantization scheme) |
+| float_model.py | Pi0FloatModel + build_pi0_float_model |
+| patch.py | Monkey-patch vla_eval (pass state to the eval dump; state normalization + fp16 in HbmExecutor.\_run_expert; mask/pos for the suffix state token) |
+| run.py | Unified entry point: float_eval / calib / calib_eval / compile |
 
 ### Data and model preparation
 
-`pi0_toolkit/tool/prep_pi05.py` handles everything in one script: the model directory, the calibration data, `norm_stats_runtime.json`, and the configuration required for quantization.
+`pi0_toolkit/tool/prep_pi0.py` handles everything in one script: the model directory, the calibration data, `norm_stats_runtime.json`, and the configuration required for quantization.
 
 ```bash
-# Use the lerobot environment
+# Use the lerobot environment (lerobot 0.6.2, reads v3.0)
 conda activate lerobot
 
-# Prepare everything needed for quantization with a single script under tool/ (v3.0 data, 3 views, 14-dim absolute actions)
-python3 tool/prep_pi05.py \
-  --ckpt-dir   <model_path xxx/checkpoints/xxxx> \
+python3 tool/prep_pi0.py \
+  --ckpt-dir     <model_path xxx/checkpoints/xxxx> \
   --dataset-root <lerobot_v3data_path lerobot_dataset/xxx> \
-  --output-dir   oe_llm_s600/pi05_conver \
-  --num-samples 30
+  --output-dir   oe_llm_s600/pi0_conver \
+  --num-samples  30
 ```
 
 <div className="markdown-table-scroll">
@@ -301,11 +329,11 @@ python3 tool/prep_pi05.py \
     </tr>
     <tr>
       <td rowSpan={2}>Quantization yml</td>
-      <td>`<output-dir>/pi05.yml`</td>
+      <td>`<output-dir>/pi0.yml`</td>
       <td>For calib / calib_eval / compile</td>
     </tr>
     <tr>
-      <td>`<output-dir>/pi05_float.yml`</td>
+      <td>`<output-dir>/pi0_float.yml`</td>
       <td>For float_eval only: evaluation.calib_ckpt_load_path has been removed (otherwise torch_eval treats it as calib_eval)</td>
     </tr>
   </tbody>
@@ -317,78 +345,83 @@ python3 tool/prep_pi05.py \
 - --model-dir is the output (the converted llm_compression directory, default \<output-dir>/model_\<step>).
 - The model. prefix is stripped inside the script.
 
+
 ### Quantize and compile
 
-Run the following in `pi05_conver/`.
+Run the following in `pi0_conver/`.
 
 ```bash
 # Use the oellm environment
 conda activate oellm
 
-cd oe_llm_s600/pi05_conver
+cd oe_llm_s600/pi0_conver
 
-# 1) float_eval: floating-point baseline + reference dump
-#    Uses pi05_float.yml (= pi05.yml with evaluation.calib_ckpt_load_path removed;
-#    torch_eval distinguishes float_eval from calib_eval by whether that key exists, so leaving it in is treated as calib_eval)
-bash ../D-Robotics_LLM_S600_2.0.0_SDK/llm_compression/scripts/torch_eval.sh --config_path pi05_float.yml
-# 2) calib: fake-quant weights + time-mod LUT
-bash ../D-Robotics_LLM_S600_2.0.0_SDK/llm_compression/scripts/calib.sh      --config_path pi05.yml
-# 3) calib_eval: fake-quant accuracy (calib_ckpt_load_path=./calib_ckpt, eval_stages=[calib] in the yml)
-rm -rf eval_dump eval_result
-bash ../D-Robotics_LLM_S600_2.0.0_SDK/llm_compression/scripts/torch_eval.sh --config_path pi05.yml
-# 4) compile: compile HBM (CPU only, lm takes about 2~3h)
-bash ../D-Robotics_LLM_S600_2.0.0_SDK/llm_compression/scripts/compile.sh    --config_path pi05.yml
+export PYTHONPATH="<D-Robotics_LLM_S600_2.0.0-Beta_SDK_path>:<D-Robotics_LLM_S600_2.0.0-Beta_SDK_path>/llm_compression/lightcompress:oe_llm_s600/pi0_conver"
+
+# Put run.py and pi0_pkg under oe_llm_s600/pi0_conver; see pi0_toolkit for the script and the pkg
+python run.py float_eval  --config_path pi0_float.yml  # 1) floating-point baseline + reference dump
+python run.py calib   --config_path pi0.yml     # 2) calibration (generates calib_ckpt/)
+python run.py calib_eval   --config_path pi0.yml # 3) fake-quant accuracy (calib_ckpt_load_path=./calib_ckpt in the yml)
+python run.py compile   --config_path pi0.yml   # 4) compile HBM (CPU only, lm takes about 2~3h)
 ```
 
-Key entries in `pi05.yml` (see the file for the complete set):
+Key entries in `pi0.yml`:
 
 ```yaml
-model:      {model_name: Pi05, model_path: .../model_035000, model_list: [visual,lm,action],
-             model_dtype: bfloat16, max_token_len: 200, enable_time_mod_lut: true}
-calibration:{dataset_type: vla_dataset, vla_image_path/vla_action_data_path/vla_prompt_path: ...,
+model:      {model_name: Pi0, model_path: .../model_060000, model_list: [visual,lm,action],
+             model_dtype: bfloat16, max_token_len: 48, enable_time_mod_lut: false}
+calibration:{dataset_type: vla_dataset, vla_image_path/vla_action_calib_data/vla_prompt_path: ...,
              calibration_step: 30, calib_ckpt_save_path: ./calib_ckpt}
 evaluation: {norm_stats_path: .../norm_stats.json, eval_stages: [calib], dump_dir: ./eval_dump}
-compile:    {hbm_save_path: ./compile, core_num: 1(visual)/4(lm,action), enable_hpc: lm=false}
+compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # HPC disabled for lm ((256*3+48)%32 issue, see "Data/configuration alignment")
+action:{enable_hpc: true,  core_num: 4}}         # HPC enabled for action
 ```
+
+Quantization scheme (pi0_model.py::get_qconfig_setting("action")):
+
+- Default: Linear qint16 in / qint8 w / fp16 out; qk/sv matmul qint16×qint16; norm/add/cat/gate fp16.
+- Modules unique to pi0 and quantized by default: state_proj, action_time_mlp_in, action_time_mlp_out.
+- model.action_w16=true → the action expert weights use qint16 (W16A16) instead of qint8 (W8A16).
 
 ### Artifacts
 
 | File | Component | Size |
 | :--- | :--- | :--- |
 | xxxx_vision_224x224_w8_nash-p_corenum_1.hbm | SigLIP | ~487 MB |
-| xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-2B LM | ~3.56 GB |
-| xxxx_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-300M action expert | ~492 MB |
+| xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-2B LM | ~3.45 GB |
+| xxxx_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-300M action expert | ~463 MB |
 
 - Quantization accuracy: for model accuracy metrics, see [Quantization accuracy](#quantization-accuracy); to check and tune the accuracy of a quantized model, see the "Accuracy evaluation" chapter of the OELLM2.0 manual, which is not covered here.
-- Compilation time (Intel Core i9-14900KF): visual ~26min + lm ~2h15min + action ~54min ≈ 3.5h.
+- Compilation time (Intel Core i9-14900KF): visual ~23min + lm ~1h58min + action ~24min ≈ 2h46min.
 
-## Stage 3: On-device deployment and running
 
-Copy the SDK to the board and focus on `D-Robotics_LLM_S600_2.0.0_SDK/oellm_runtime/examples/vla_demo/pi0`. Before running, grant execute permission to `vla_sdk_demo` with: `chmod +x vla_sdk_demo`
+## On-device deployment and running
+
+Copy the SDK to the board and focus on `D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/examples/vla_demo/pi0`. Before running, grant execute permission to `vla_sdk_demo` with: `chmod +x vla_sdk_demo`
 
 ### Required files at runtime
 
 ```text
-pi05/
+pi0/
 ├── xxxx_{vision,llm,action}_*.hbm             # Stage 2 artifacts, three models
-├── norm_stats.json                            # On-device runtime norm stats (includes state+actions, generated by prep_pi05)
+├── norm_stats.json                            # On-device runtime norm stats (includes state+actions, generated by prep_pi0)
 ├── tokenizer.json / tokenizer_config.json     # Located under paligemma-3b-pt-224
 ├── paligemma_tokenizer.model                  # tokenizer.model under paligemma-3b-pt-224, renamed
-├── pi05_config.json                           # oellm model configuration (under oellm_runtime/examples/vla_demo/pi0)
+├── pi0_config.json                            # oellm model configuration (under oellm_runtime/examples/vla_demo/pi0)
 └── demo.json                                  # demo configuration (network, 127.0.0.1:30005, under oellm_runtime/examples/vla_demo/pi0)
 ```
 
 ### Runtime configuration reference
 
-#### pi05_config.json
+**pi0_config.json**
 
 ```jsonc
 {
   "runtime_type": "Pi0Sdk",
   "model": {
-    "version": "0.5",
+    "version": "0",
     "denoise_num": 10,
-    "work_path": "/root/VLA/pi05",
+    "work_path": "/root/VLA/pi0",
     "model_runner": {
       "visual": "xxxx_vision_224x224_w8_nash-p_corenum_1.hbm",
       "lm": "xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm",
@@ -430,7 +463,7 @@ pi05/
     "use_absolute_action": true,
     "use_quantiles_norm": false,
     "delta_action_mask": [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
-    "inject_state": true
+    "inject_state": false
   },
   "dfx": {
     "verbose": false,
@@ -442,7 +475,7 @@ pi05/
 }
 ```
 
-#### demo.json
+**pi0_network_demo.json**
 
 ```jsonc
 {
@@ -466,7 +499,7 @@ pi05/
 
 Without hardware or teleoperation, feed GT observations (images + state) to the on-device HBM step by step and compare the predicted actions with the GT. On-device script: `pi0_toolkit/deploy/openloop_infer_piper.py` (plus `plot_openloop_npz.py` in the same directory, which generates the plots automatically when finished).
 
-#### Data extraction (training machine side)
+**Data extraction (training machine side)**
 
 Use `pi0_toolkit/tool/extract_episodes_v3.py` to extract the specified episodes from a v3.0 dataset:
 
@@ -487,7 +520,7 @@ The output layout required by `openloop_infer_piper.py --eval-data`:
 <out>/prompt.json · norm_stats.json · manifest.json
 ```
 
-#### Open-loop test on the board
+**Open-loop test on the board**
 
 Copy the data extracted in the previous step to the board:
 
@@ -508,25 +541,25 @@ python3 openloop_infer_piper.py --model-dir <model_path>  --eval-data <eval_data
 
 :::warning
 
-- --model pi05: --model defaults to pi05; using pi0 HBM with the pi05 preset reports \[layout\] suffix_pad=1 invalid ... suffix layout mismatch with HBM (version/suffix mismatch).
+- --model pi0: --model defaults to pi05; using pi0 HBM with the pi05 preset reports \[layout\] suffix_pad=1 invalid ... suffix layout mismatch with HBM (version/suffix mismatch).
 - --model-dir determines which directory's three .hbm files are read; norm_stats defaults to --model-dir/norm_stats.json and must contain state (if missing, use --norm-stats \<a file containing state\>).
 - Results: when finished, \*_trajectories.png / \*_frame_mae.png / \*_perdim_mae.png are generated automatically.
 
 :::
 
-![On-device open-loop test result: Calib openloop: GT action vs pred (chunk step 0), comparing the GT and predicted action curves for each joint](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-pi05-openloop-trajectories.png)
+![On-device open-loop test result: Calib openloop: CT action vs pred (chunk step 0), comparing the GT and predicted action curves for each joint](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-pi05-openloop-trajectories.png)
 
 ### Run on the real robot
 
-Start the pi05 runtime on the board. With `--mode network`, the runtime acts as a TCP client and actively connects to port `30005`, which the client listens on:
+Start the pi0 runtime on the board. With `--mode network`, the runtime acts as a TCP client and actively connects to port `30005`, which the client listens on:
 
 ```bash
-# pi05 (RTC)
-cd D-Robotics_LLM_S600_2.0.0_SDK/oellm_runtime/examples/vla_demo/pi0
-export LD_LIBRARY_PATH=<D-Robotics_LLM_S600_2.0.0_SDK/oellm_runtime/lib>:$PWD/dist:${LD_LIBRARY_PATH:-}
+# pi0 (RTC)
+cd D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/examples/vla_demo/pi0
+export LD_LIBRARY_PATH=<D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/lib>:$PWD/dist:${LD_LIBRARY_PATH:-}
 export HB_DNN_USER_DEFINED_L2M_SIZES=6:6:6:6
 ./dist/vla_sdk_demo \
-  --oellm_config <pi05_config_json_path> \
+  --oellm_config <pi0_config_json_path> \
   --demo_config  <demo_json_path> \
   --mode network
 ```
@@ -534,7 +567,7 @@ export HB_DNN_USER_DEFINED_L2M_SIZES=6:6:6:6
 Client (the `pi0_toolkit/deploy/vla_robot` delivery package: pure Python, dual-arm control of CAN directly through piper_sdk, no ROS dependency; the control package is a reference and can be optimized further; for usage see below, and vla_robot/README.md for details):
 
 ```bash
-cd /root/vla_robot
+cd vla_robot
 bash setup.sh                 # Run once on first use or after migrating: create the shared venv + install dependencies + write paths (idempotent)
 
 # —— Robotic arm self-check (read-only by default; first run sudo ip link set can_left/right up type can bitrate 1000000)
@@ -553,7 +586,7 @@ bash setup.sh                 # Run once on first use or after migrating: create
 - The board and the client must agree: the client process listens on server.host:server.port (default 0.0.0.0:30005), and the on-device runtime connects to it.
 - All paths inside the package are relative to the delivery package root, so the package can be copied as a whole; piper_sdk is already vendored under arm_control/third_party/, so a new machine only needs bash setup.sh.
 
-#### Network communication protocol
+**Network communication protocol**
 
 - Roles and direction: the on-device runtime (dist/vla_sdk_demo --mode network) is the TCP client and actively connect()s to the client machine; the client side (the machine hosting the camera/arm nodes of the arm_interface deployment chain; reference implementation: deploy/src/inference_runner/inference_runner/oellm_tcp.py::OellmTcpClient) is the TCP server. The address and port are in demo.json under network.\{server_ip,server_port,timeout\} (default 127.0.0.1:30005).
 - Framing: each frame = \[4-byte big-endian length\]\[protobuf byte stream\]. On the board, vla_demo_network.h reads and writes the length header with htonl/ntohl and sends/receives with SerializeToString/ParseFromString; the client aligns with struct.pack(">I", len). Requests and responses use the same message type (MultiModalInput).
@@ -577,21 +610,21 @@ bash setup.sh                 # Run once on first use or after migrating: create
   }
   message MultiModalInput {
     Header         header    = 1;
-    repeated Tensor images   = 2;  // num_views images (pi05=3), shape=[3,H,W] CHW, DT_UINT8
+    repeated Tensor images   = 2;  // 3 images, shape=[3,H,W] CHW, DT_UINT8
     repeated Tensor languages= 3;  // prompt text, DT_STRING (tokenized internally on the board)
-    repeated Tensor states   = 4;  // state vector, DT_FLOAT64 (inject_state=true, injected into the prompt)
+    repeated Tensor states   = 4;  // state vector, DT_FLOAT64 (pi0 uses this tensor for state_proj)
   }
   ```
 
-- Request → response: the client sends images/languages/states (plus the optional RTC constraints in fields 5/6), and the board returns a MultiModalInput of the same type, with the actions placed in languages\[0\] (dtype FLOAT64 or FP16, with shape = the original dimensions \[action_horizon, action_dim\]); the client's decode_response reads languages\[0\] accordingly.
-- pi05 injects state into the prompt (inject_state=true): the client sends raw values and the runtime host side normalizes them (see below).
+- Request → response: the client sends images/languages/states (plus the optional RTC constraints in fields 5/6), and the board returns a MultiModalInput of the same type, with the actions placed in languages\[0\] (dtype FLOAT64 or FP16, with shape = the original dimensions \[action_horizon, action_dim\]).
+- pi0 sends state through the states tensor (inject_state=false, so it never enters the prompt): the client sends raw values and the runtime host side normalizes them (see below).
 
 ### Request tensor format and normalization
 
 | Field | dtype | shape | Content | Normalized |
 | :--- | :--- | :--- | :--- | :--- |
 | images\[i\] | DT_UINT8 (FLOAT32/FP16 also accepted) | \[3, H, W\] (CHW, RGB) | Raw camera pixels 0–255 | Not normalized; for UINT8 the runtime performs ResizeWithPad(→224×224) + normalization internally |
-| languages\[0\] | DT_STRING (or DT_INT32) | \[\] (or \[token_len\]) | Raw prompt text (UTF-8), or already-tokenized token ids | Not applicable (text); tokenized internally by the runtime (pi05 inject_state=true, so state is injected into the prompt) |
+| languages\[0\] | DT_STRING (or DT_INT32) | \[\] (or \[token_len\]) | Raw prompt text (UTF-8), or already-tokenized token ids | Not applicable (text); tokenized internally by the runtime (pi0 inject_state=false, so state is not injected into the prompt) |
 | states\[0\] | DT_FLOAT64 | \[14\] | Raw joint values (6 joints per arm + gripper, raw physical values) | Not normalized; the runtime host side normalizes with the state.mean/std from norm_stats_runtime.json before feeding the HBM (preproc=true) |
 | prev_actions (field 5) | DT_FLOAT64 | \[n\*14\] flattened | The unexecuted tail of the previous chunk (raw) | Not normalized; handled on the engine side using the action statistics |
 
@@ -603,13 +636,6 @@ bash setup.sh                 # Run once on first use or after migrating: create
 - The actions in the response-side languages\[0\] are absolute joint actions in the model output space (combined with processing such as use_absolute_action/filter), so their scale differs from that of the request tensors above.
 
 :::
-
-## Results
-
-<video controls width="100%" preload="metadata">
- <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi05-effect.mp4" type="video/mp4" />
- Your browser does not support the video tag.
-</video>
 
 ## Troubleshooting
 
@@ -639,6 +665,7 @@ bash setup.sh                 # Run once on first use or after migrating: create
 | state | Injected into the prompt (inject_state) | inject_state=true + state_size=14 |
 | Images | Stored at 480×640, resized to 224 inside the model | First resized to 224 with openpi resize_with_pad |
 
+
 ## Acceptance metrics
 
 ### Quantization accuracy
@@ -651,10 +678,10 @@ For reference only for this task; calibration set of 30 samples, fake-quant vs f
 
 | Stage | Metric | Value |
 | :--- | :--- | :--- |
-| calib_eval | action MAE | 0.009048 |
-| calib_eval | action RMSE | 0.016222 |
-| calib_eval | action cosine | 0.999232 |
-| calib_eval | tensor MAE | 0.015608 |
-| calib_eval | tensor cosine | 0.999274 |
+| calib_eval | action MAE | 0.001846 |
+| calib_eval | action RMSE | 0.003304 |
+| calib_eval | action cosine | 0.999772 |
+| calib_eval | tensor MAE | 0.002611 |
+| calib_eval | tensor cosine | 0.999775 |
 
-preproc 0.1ms + visual 20ms + lm 108ms + action 125ms + postproc 0.1ms ≈ 255ms. This is the high-accuracy version; to improve inference performance, refer to the balanced and high-performance versions in the OELLM toolchain.
+preproc 0.1ms + visual ~20ms + lm ~100ms + action ~125ms + postproc 0.1ms ≈ 250-270ms. This is the high-accuracy version; to improve inference performance, refer to the balanced and high-performance versions in the OELLM toolchain.

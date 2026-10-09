@@ -163,6 +163,31 @@ const config = {
             from: "/intro",
             to: "/case",
           },
+          // 高阶案例章节调整：原第四章页面迁入“视觉语言动作模型（VLA）”子类目
+          {
+            from: "/advanced/holobrain",
+            to: "/advanced/vla/holobrain",
+          },
+          {
+            from: "/04_advanced/holobrain",
+            to: "/advanced/vla/holobrain",
+          },
+          {
+            from: "/advanced/holobrain/faq",
+            to: "/advanced/vla/holobrain#faq",
+          },
+          {
+            from: "/advanced/pi0_pi05",
+            to: "/advanced/vla/pi0_pi05",
+          },
+          {
+            from: "/advanced/pi0_pi05/pi0",
+            to: "/advanced/vla/pi0_pi05/pi0",
+          },
+          {
+            from: "/advanced/pi0_pi05/pi05",
+            to: "/advanced/vla/pi0_pi05/pi05",
+          },
         ],
       },
     ],

@@ -2,7 +2,6 @@
 title: "Pi0"
 description: "Pi0 视觉语言动作模型从 LeRobot 训练、OELLM2.0 量化编译到 RDK S600 板端部署运行的完整链路与问题解决方法。"
 sidebar_position: 2
-sidebar_label: 1. Pi0
 ---
 
 # Pi0
@@ -11,7 +10,7 @@ sidebar_label: 1. Pi0
 ## 流程概览
 
 ```text
-[阶段一] 训练
+训练
    pi0_base  (HF 预训练)
         │  finetune  (v3.0 数据集, 30 fps)
         ▼
@@ -19,7 +18,7 @@ sidebar_label: 1. Pi0
 
         │
         ▼
-[阶段二] 量化 + 编译(oe_llm_s600/pi0_conver/)
+量化 + 编译(oe_llm_s600/pi0_conver/)
    float_eval  → 浮点基线 / 参考 dump
    calib       → fake-quant 权重 (pi0 无 time-mod LUT)
    calib_eval  → 伪量化精度 (校准集)
@@ -27,7 +26,7 @@ sidebar_label: 1. Pi0
 
         │
         ▼
-[阶段三] 板端部署与运行
+板端部署与运行
    3× HBM + norm_stats_runtime.json + tokenizer/
    服务端 (vla_sdk_demo) + 客户端 (vla_robot)
 ```
@@ -37,13 +36,22 @@ sidebar_label: 1. Pi0
 - pi0 模型/流程代码在 pi0_pkg，通过运行时注册 + monkey-patch 接入框架。
 
 
+## 运行效果
+
+<video controls width="100%" preload="metadata">
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-effect.mp4" type="video/mp4" />
+ 您的浏览器不支持 video 标签。
+</video>
+
+
+
 ## 获取工具包
 
 ```shell
 wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_toolkit.tar.gz
 ```
 
-## 阶段一：训练（LeRobot pi0）
+## 训练
 
 ### 环境准备
 
@@ -115,7 +123,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
     --policy.freeze_vision_encoder=false \
     --policy.train_expert_only=false \
     --policy.push_to_hub=false \
-    --steps=3000 \
+    --steps=30000 \
     --policy.device=cuda \
     --batch_size=32 \
     --rename_map '{"state":"observation.state","head_cam":"observation.images.head_cam",
@@ -127,7 +135,9 @@ HF_HUB_OFFLINE=1 lerobot-train \
   --resume=true --steps=60000 --dataset.eval_split=0.05 --eval_steps=1000
 ```
 
-#### 关键配置（`train_config.json`/`config.json`）
+**关键配置**
+
+**train_config.json** / **config.json**
 
 | 项 | 值 |
 | :--- | :--- |
@@ -144,7 +154,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 | tokenizer | tokenizer_max_length=48 |
 | 部署相关 | type=pi0<br />chunk_size=50<br />n_action_steps=50<br />num_inference_steps=10<br />compile_model=true<br />image_resolution=\[224,224\]<br />use_relative_actions=false<br />control_fps=30 |
 
-#### 训练资源与耗时
+**训练资源与耗时**
 
 | 项 | 值 |
 | :--- | :--- |
@@ -168,7 +178,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。
 :::
 
-#### v2.1 — fold_the_towel
+**v2.1 — fold_the_towel**
 
 ```text
 .
@@ -189,7 +199,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
         └── right_cam/episode_000000.mp4
 ```
 
-#### v3.0 — fold_the_towel_v3
+**v3.0 — fold_the_towel_v3**
 
 ```text
 .
@@ -210,7 +220,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
     └── right_cam/chunk-000/file-000.mp4
 ```
 
-#### 关键差异
+**关键差异**
 
 | 项 | v2.1 | v3.0 |
 | :--- | :--- | :--- |
@@ -229,7 +239,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 
 :::
 
-## 阶段二：量化 + 编译（OELLM2.0）
+## 量化编译
 
 ### 环境准备
 
@@ -240,7 +250,7 @@ pip install $SDK/package/host/*.whl          # horizon / hbdk / hbm
 pip install -r $SDK/llm_compression/requirements.txt
 pip install --force-reinstall setuptools==80.10.2
 
-# 创建pi0_conver文件夹，量化所需文件以及生成产物都放在pi0_conver
+# 创建 pi0_conver文件夹，量化所需文件以及生成产物都放在 pi0_conver
 mkdir oe_llm_s600/pi0_conver
 ```
 
@@ -378,11 +388,11 @@ action:{enable_hpc: true,  core_num: 4}}         # action 开 HPC
 | xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-2B LM | ~3.45 GB |
 | xxxx_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-300M 动作专家 | ~463 MB |
 
-- 量化精度：模型精度指标可参考见 [量化精度](#量化精度)，量化模型精度查验与调优见 OELLM2.0 手册「精度评测」章节，此处不展开。
+- 量化精度：模型精度指标参见 [量化精度](#量化精度)，量化模型精度查验与调优见 OELLM2.0 手册「精度评测」章节，此处不展开。
 - 编译耗时（Intel Core i9-14900KF）：visual ~23min + lm ~1h58min + action ~24min ≈ 2h46min。
 
 
-## 阶段三：板端部署与运行
+## 板端部署与运行
 
 把 SDK 放到板端，重点关注 `D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/examples/vla_demo/pi0`，运行前需执行以下命令给 `vla_sdk_demo` 赋执行权限：`chmod +x vla_sdk_demo`
 
@@ -400,7 +410,7 @@ pi0/
 
 ### 运行时配置参考
 
-#### pi0_config.json
+**pi0_config.json**
 
 ```jsonc
 {
@@ -462,7 +472,7 @@ pi0/
 }
 ```
 
-#### pi0_network_demo.json
+**pi0_network_demo.json**
 
 ```jsonc
 {
@@ -486,7 +496,7 @@ pi0/
 
 不开硬件/遥控，用 GT 观测（图像 + state）逐步喂板端 HBM，把预测动作与 GT 对比。板端脚本 `pi0_toolkit/deploy/openloop_infer_piper.py`（+ 同目录 `plot_openloop_npz.py`，跑完自动出图）。
 
-#### 数据获取（训练机侧）
+**数据获取（训练机侧）**
 
 用 `pi0_toolkit/tool/extract_episodes_v3.py` 从 v3.0 数据集抽取指定 episode：
 
@@ -507,7 +517,7 @@ python3 extract_episodes_v3.py --episodes 0 3 5 --stride 30 -o <out>
 <out>/prompt.json · norm_stats.json · manifest.json
 ```
 
-#### 板端开环
+**板端开环**
 
 将上一步抽取的数据拷到板端：
 
@@ -573,7 +583,7 @@ bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + �
 - 板端约定一致：客户端进程监听 server.host:server.port（默认 0.0.0.0:30005），板端 runtime 主动连入。
 - 包内路径全为相对交付包根目录，可整体拷贝。piper_sdk 已 vendored 在 arm_control/third_party/，新机器只需 bash setup.sh。
 
-#### 网络通信协议
+**网络通信协议**
 
 - 角色方向：板端 runtime（dist/vla_sdk_demo --mode network）是 TCP client，主动 connect() 到客户端机器。客户端侧（arm_interface 部署链的相机/臂节点所在机器，参考实现 deploy/src/inference_runner/inference_runner/oellm_tcp.py::OellmTcpClient）是 TCP server。地址/端口在 demo.json 的 network.\{server_ip,server_port,timeout\}（默认 127.0.0.1:30005）。
 - 分帧：每帧 = \[4 字节大端序长度\]\[protobuf 字节流\]。板端 vla_demo_network.h 用 htonl/ntohl 读写长度头、SerializeToString/ParseFromString 收发。客户端用 struct.pack(">I", len) 对齐。请求与响应同为一种消息（MultiModalInput）。
@@ -623,13 +633,6 @@ bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + �
 - 响应侧 languages\[0\] 的动作是模型输出空间的绝对关节动作（配合 use_absolute_action/filter 等 processing），与上述请求张量的原始量纲不同。
 
 :::
-
-## 效果参考
-
-<video controls width="100%" preload="metadata">
- <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-effect.mp4" type="video/mp4" />
- 您的浏览器不支持 video 标签。
-</video>
 
 ## 问题与解决方法
 

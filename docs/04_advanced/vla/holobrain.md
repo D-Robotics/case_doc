@@ -1,11 +1,11 @@
 ---
-title: "HoloBrain 通用物体抓取"
+title: "HoloBrain 通用物体抓取（真机）"
 description: "在 RDK S600 上完成 HoloBrain 通用物体抓取的环境配置、模型部署与任务运行。"
-sidebar_position: 1
-sidebar_label: 1. HoloBrain 通用物体抓取
+sidebar_position: 2
+sidebar_label: 2. HoloBrain 通用物体抓取（真机）
 ---
 
-# HoloBrain 通用物体抓取
+# HoloBrain 通用物体抓取（真机）
 
 [HoloBrain](https://horizonrobotics.github.io/robot_lab/holobrain/) 是地平线推出的轻量化 VLA 基座模型，首创“具身感知”架构，融合多视角视觉信息与机器人运动学先验，实现更强的 3D 空间理解与推理能力。通过统一的混合相对动作空间，兼容单臂、双臂及移动操作平台，打破异构硬件壁垒。仅 0.2B 参数即可实现业界领先性能，在 RoboTwin 2.0、LIBERO 等基准测试中达到 SOTA 水平，并支持抓取、叠衣、柔性/变形物体操作等复杂长序列任务。结合 RDK S600 高算力平台，HoloBrain 可实现边缘端实时推理，构建感知—决策—控制全链路低延迟闭环，加速具身智能应用落地。本文将以通用抓取任务为例，详细介绍如何在 RDK S600 平台上完成 HoloBrain 的环境配置、模型部署及任务运行。
 
@@ -15,6 +15,13 @@ sidebar_label: 1. HoloBrain 通用物体抓取
 | 模型 | [HoloBrain_v0.0_GD](https://huggingface.co/HorizonRobotics/HoloBrain_v0.0_GD) |
 | 任务 | 通用物体抓取 |
 | 性能（DECODE = 5） | wall=116.823ms <br/> text=9.3007ms <br/> enc=40.2941ms <br/> dec=54.6188ms |
+
+## 运行效果
+
+<video controls width="100%" preload="metadata">
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-effect.mp4" type="video/mp4" />
+ 您的浏览器不支持 video 标签。
+</video>
 
 
 ## 硬件准备
@@ -99,7 +106,7 @@ rs-enumerate-devices | grep Serial
 
 #### 调整中间摄像头位置
 
-另外中间摄像头与左臂的变换关系如下，为保证效果，请调整中间摄像头位置，尽可能接近下图中摄像头和左臂的变换关系（position）。若需要确定实际变换关系，可参考 [FAQ](./faq) 中的标定教程。
+另外中间摄像头与左臂的变换关系如下，为保证效果，请调整中间摄像头位置，尽可能接近下图中摄像头和左臂的变换关系（position）。若需要确定实际变换关系，可参考 [FAQ](#faq) 中的标定教程。
 
 <img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-middle-camera-transform.png" alt="中间摄像头与左臂变换关系" width="40%"/>
 
@@ -396,3 +403,95 @@ DECODER_STEPS=5 sh run_hbm_http_server.sh
 #杀掉所有进程
 ./launch/stop.sh
 ```
+
+## FAQ
+
+### Q1：执行 `apt` 命令找不到软件包怎么办？
+
+```text
+E: Unable to locate package ...
+```
+
+**A：** 执行以下命令更新软件源，然后尝试重新安装。
+
+```bash
+sudo apt update
+```
+
+### Q2：执行 `ros2` 命令找不到命令怎么办？
+
+```text
+ros2: command not found
+```
+
+**A：** 执行以下命令加载 ROS 2 环境。
+
+```bash
+source /opt/ros/jazzy/setup.bash
+#如果是 RoboOrchard 的 ROS 2 package，还需要执行以下命令：
+source ros2_package/install/setup.bash
+```
+
+### Q3：需要使用到 `can_left` 设备的时候找不到 `can_left` 设备怎么办？
+
+**A：** 执行以下命令检查 CAN 设备。
+
+```bash
+#列出识别到的所有的设备
+ip link
+
+#检查 CAN 映射
+bash teleop/find-all-can-port.sh
+```
+
+确认实际 CAN 设备已经被正确重命名为：
+
+```text
+can_left
+can_right
+```
+
+### Q4：相机没有图像怎么办？
+
+**A：** 执行以下命令检查相机是否被正常识别。
+
+```bash
+#首先检查，确认相机被正常识别
+rs-enumerate-devices
+
+#然后检查是否存在图像 Topic
+ros2 topic list | grep image
+
+#再检查具体图像 Topic
+ros2 topic hz <image_topic>
+ros2 topic info <image_topic> -v
+```
+
+重点检查：
+
+- USB 连接是否正常
+- 是否使用 USB 3.0
+- Serial Number 是否配置正确
+- ROS 2 RealSense driver 是否正常启动
+
+### Q5：NumPy / OpenCV / SciPy 版本冲突怎么办？
+
+**A：** 执行以下命令重新安装相关依赖。
+
+```bash
+pip install \
+    "numpy==1.26.4" \
+    "opencv-python<4.11" \
+    "scipy<1.14" \
+    "numpydantic<1.7"
+```
+
+### Q6：如何标定左臂与中间摄像头的位置关系？ {#handeye-calib}
+
+**A：** 
+- 参考 [标定教程](https://horizonrobotics.github.io/robot_lab/holobrain/real_env/modules/handeye_calib.html)。
+- 注意 `RoboOrchard/projects/HoloBrain/handeye_calib/launch_handeye_calib.sh` 脚本配置。
+- 启动 `./launch/start.sh` 之后，启动标定服务 `bash handeye_calib/launch_handeye_calib.sh`。
+- 短按机械臂上的按钮变为绿色，即可手动移动机械臂，移动至不同的位置并单击 **Record Current Pose**。
+- 记录多个位置之后单击 **Save and Compute Hand-Eye Calibration**，保存标定文件到当前路径下。
+- 所需物料：[aruco marker](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/aruco-100.svg) 以及可粘贴 [aruco marker 的支架](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/Unnamed2-M-COMA-340012-B_final_plate.stl)。

@@ -13,10 +13,10 @@ sidebar_label: 概述
 
 ## pi0 与 pi05 差异说明
 
-| | pi05 | pi0 |
+| 对比项 | pi05 | pi0 |
 | --- | --- | --- |
 | version | 0.5 | 0 |
-| state 注入 | 无 token；<br />走 AdaRMSNorm(adarms) 调制 | state_proj(32→1024) + **前缀 state token** |
+| state 注入 | 无 token；<br />走 AdaRMSNorm(adarms) 调制 | state_proj(32→1024) + 前缀 state token |
 | time 注入 | time_mlp → adarms 调制 | action_time_mlp 与 action 拼接进输入 |
 | prompt 长度 | 200 | 48 |
 | action suffix | \[action_horizon\]（50） | \[state_token\] + \[action_horizon\]（51） |

@@ -2,7 +2,7 @@
 title: "Vision-Language-Action Model (VLA)"
 description: "Deploy the Pi0 vision-language-action model on the RDK S600 and in PC simulation for end-to-end robot control."
 sidebar_position: 1
-sidebar_label: 1. Vision-Language-Action Model (VLA)
+sidebar_label: 1. Pi0 Hammer the Block (Simulation)
 ---
 
 # Vision-Language-Action Model (VLA)

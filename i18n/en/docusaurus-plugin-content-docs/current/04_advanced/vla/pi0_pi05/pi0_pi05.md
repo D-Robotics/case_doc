@@ -13,10 +13,10 @@ This document covers the full pipeline of pi0 / pi05 (fine-tuned checkpoint 0300
 
 ## Differences between pi0 and pi05
 
-| | pi05 | pi0 |
+| Item | pi05 | pi0 |
 | --- | --- | --- |
 | version | 0.5 | 0 |
-| state injection | no token;<br />uses AdaRMSNorm (adarms) modulation | state_proj (32→1024) + **prefix state token** |
+| state injection | no token;<br />uses AdaRMSNorm (adarms) modulation | state_proj (32→1024) + prefix state token |
 | time injection | time_mlp → adarms modulation | action_time_mlp concatenated with the action into the input |
 | prompt length | 200 | 48 |
 | action suffix | \[action_horizon\] (50) | \[state_token\] + \[action_horizon\] (51) |
