@@ -39,7 +39,7 @@ For embodied intelligence scenarios, demonstrating PC simulation co-debugging an
 - **[Vision-Language-Action Model (VLA)](/04_advanced/vla)**: Overview of the VLA cases, covering the three cases below.
   - **[Pi0 Hammer the Block (Simulation)](/advanced/vla)**: Deploy the RoboTwin simulation environment on PC and the Pi0 model on S600 for inference, covering PC simulation deployment, S600 on-device deployment, and run results.
   - **[HoloBrain General Object Grasping (Real Robot)](/advanced/vla/holobrain)**: Configure the HoloBrain environment on RDK S600, deploy the model, and run a general object-grasping task, covering hardware setup, environment setup, and start/stop. See [FAQ](/advanced/vla/holobrain#faq) for common issues.
-  - **[Pi0 & Pi05 Fold the Towel (Real Robot)](/advanced/vla/pi0_pi05)**: Train Pi0 and Pi05 for the towel-folding task with LeRobot, quantize and compile with OELLM2.0, and deploy and run on-device; the training and deployment flow is covered in the [Pi0](/advanced/vla/pi0_pi05/pi0) and [Pi05](/advanced/vla/pi0_pi05/pi05) pages.
+  - **[Pi0 & Pi05 Fold the Towel (Real Robot)](/advanced/vla/pi0_pi05)**: Train Pi0 and Pi05 for the towel-folding task with LeRobot, quantize and compile with OELLM 2.0, and deploy and run on-device; the training and deployment flow is covered in the [Pi0](/advanced/vla/pi0_pi05/pi0) and [Pi05](/advanced/vla/pi0_pi05/pi05) pages.
 
 ### 5. More Resources
 

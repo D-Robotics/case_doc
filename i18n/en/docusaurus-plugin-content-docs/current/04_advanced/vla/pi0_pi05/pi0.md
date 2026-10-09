@@ -1,6 +1,6 @@
 ---
 title: "Pi0"
-description: "The complete pipeline for the Pi0 vision-language-action model, from LeRobot training and OELLM2.0 quantization and compilation to on-device deployment on the RDK S600, with troubleshooting."
+description: "The complete pipeline for the Pi0 vision-language-action model, from LeRobot training and OELLM 2.0 quantization and compilation to on-device deployment on the RDK S600, with troubleshooting."
 sidebar_position: 2
 sidebar_label: 1. Pi0
 ---
@@ -87,7 +87,7 @@ Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
 
       - The pretrained weights `lerobot/pi0_base`, and the tokenizer `google/paligemma-3b-pt-224` that `tokenizer_name` points to in its `policy_preprocessor.json`. If you can access Hugging Face and do not set `HF_HUB_OFFLINE=1` during training, you do not need to download them in advance; `lerobot-train` pulls them automatically by repository name. The training command below sets `HF_HUB_OFFLINE=1`, so you must complete the local preparation first.
 
-      - `google/paligemma-3b-pt-224` is a gated model, so you must be granted access before downloading it: sign in to [Hugging Face](https://huggingface.co), open [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224), click Acknowledge license to accept the Gemma license (this takes effect immediately), then run `hf auth login`.
+      - `google/paligemma-3b-pt-224` is a gated model, so you must be granted access before downloading it: sign in to [Hugging Face](https://huggingface.co), open [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224), click Acknowledge license to accept the Gemma license, fill in your information, and once access is granted, you can download the model.
 
     - If your network is poor, or the training command sets `HF_HUB_OFFLINE=1` (which reads only local files and no longer contacts Hugging Face), download everything in advance under the `lerobot` directory. Use `./pi0_base` as `--policy.pretrained_path`; after downloading, change `tokenizer_name` in `pi0_base/policy_preprocessor.json` to `./paligemma-3b-pt-224`.
 
@@ -391,7 +391,7 @@ Quantization scheme (pi0_model.py::get_qconfig_setting("action")):
 | xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-2B LM | ~3.45 GB |
 | xxxx_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-300M action expert | ~463 MB |
 
-- Quantization accuracy: for model accuracy metrics, see [Quantization accuracy](#quantization-accuracy); to check and tune the accuracy of a quantized model, see the "Accuracy evaluation" chapter of the OELLM2.0 manual, which is not covered here.
+- Quantization accuracy: for model accuracy metrics, see [Quantization accuracy](#quantization-accuracy); to check and tune the accuracy of a quantized model, see the "Accuracy evaluation" chapter of the OELLM 2.0 manual, which is not covered here.
 - Compilation time (Intel Core i9-14900KF): visual ~23min + lm ~1h58min + action ~24min ≈ 2h46min.
 
 

@@ -1,6 +1,6 @@
 ---
 title: "Pi0"
-description: "Pi0 视觉语言动作模型从 LeRobot 训练、OELLM2.0 量化编译到 RDK S600 板端部署运行的完整链路与问题解决方法。"
+description: "Pi0 视觉语言动作模型从 LeRobot 训练、OELLM 2.0 量化编译到 RDK S600 板端部署运行的完整链路与问题解决方法。"
 sidebar_position: 2
 ---
 
@@ -385,7 +385,7 @@ action:     {enable_hpc: true,  core_num: 4}}         # action 开 HPC
 | xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-2B LM | ~3.45 GB |
 | xxxx_action_horizon_50_w8_nash-p_corenum_4.hbm | Gemma-300M 动作专家 | ~463 MB |
 
-- 量化精度：模型精度指标参见 [量化精度](#量化精度)，量化模型精度查验与调优见 OELLM2.0 手册「精度评测」章节，此处不展开。
+- 量化精度：模型精度指标参见 [量化精度](#量化精度)，量化模型精度查验与调优见 OELLM 2.0 手册「精度评测」章节，此处不展开。
 - 编译耗时（Intel Core i9-14900KF）：visual ~23min + lm ~1h58min + action ~24min ≈ 2h46min。
 
 
