@@ -82,9 +82,9 @@ wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_toolkit.
 
     - 训练依赖两份 Hugging Face 资源：
 
-      - 预训练权重 `lerobot/pi0_base`，以及其 `policy_preprocessor.json` 中 `tokenizer_name` 指向的 tokenizer `google/paligemma-3b-pt-224`。可以访问 Hugging Face、且训练时不设置 `HF_HUB_OFFLINE=1` 时，不必提前下载，`lerobot-train` 会按仓库名自动拉取。下方训练命令带有 `HF_HUB_OFFLINE=1`，需要先完成本地准备。
+      - 预训练权重 `lerobot/pi0_base`，若可以正常访问 Hugging Face，则不必提前下载，训练时`lerobot-train` 会按仓库名自动拉取。若网络较差，可参考下方命令，先下载权重到本地，训练时设置 `HF_HUB_OFFLINE=1`，并更换路径即可。
 
-      - `google/paligemma-3b-pt-224` 是 gated 模型，下载前需要先授权：登录 [Hugging Face](https://huggingface.co)，打开 [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224)，点击 Acknowledge license 同意 Gemma 使用许可（同意后立即生效），再执行 `hf auth login`。
+      - `google/paligemma-3b-pt-224` 是 gated 模型，下载前需要先授权：登录 [Hugging Face](https://huggingface.co)，打开 [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224)，点击 Acknowledge license 同意 Gemma 使用许可，填写信息获取授权后，即可下载模型。
 
     - 网络较差，或训练命令带有 `HF_HUB_OFFLINE=1`（只读本地文件，不再访问 Hugging Face）时，在 `lerobot` 目录下提前下载。`./pi0_base` 作为 `--policy.pretrained_path`。下载完成后，把 `pi0_base/policy_preprocessor.json` 里的 `tokenizer_name` 改为 `./paligemma-3b-pt-224`。
 
@@ -120,12 +120,14 @@ HF_HUB_OFFLINE=1 lerobot-train \
     --policy.compile_model=true \
     --policy.gradient_checkpointing=true \
     --policy.dtype=bfloat16 \
-    --policy.freeze_vision_encoder=false \
-    --policy.train_expert_only=false \
+    --policy.freeze_vision_encoder=true \
+    --policy.train_expert_only=true \
     --policy.push_to_hub=false \
     --steps=30000 \
     --policy.device=cuda \
     --batch_size=32 \
+    --wandb.enable=true \
+    --wandb.project=pi0_training \
     --rename_map '{"state":"observation.state","head_cam":"observation.images.head_cam",
 "left_cam":"observation.images.left_cam","right_cam":"observation.images.right_cam"}'
 
@@ -144,7 +146,6 @@ HF_HUB_OFFLINE=1 lerobot-train \
 | policy | pi0（gemma_2b + gemma_300m） |
 | batch | 32 |
 | steps | 30000 |
-| lr | AdamW 2.5e-5<br />cosine + warmup 1000<br />decay 30000 |
 | dtype | bfloat16<br />compile_model=true<br />compile_mode=max-autotune |
 | freeze | true |
 | train_expert_only | true |
@@ -152,30 +153,26 @@ HF_HUB_OFFLINE=1 lerobot-train \
 | action / state | 输出 14 维（pad 32）；state 14 维（pad 32） |
 | 归一化 | ACTION/STATE=MEAN_STD<br />VISUAL=IDENTITY |
 | tokenizer | tokenizer_max_length=48 |
-| 部署相关 | type=pi0<br />chunk_size=50<br />n_action_steps=50<br />num_inference_steps=10<br />compile_model=true<br />image_resolution=\[224,224\]<br />use_relative_actions=false<br />control_fps=30 |
 
 **训练资源与耗时**
 
 | 项 | 值 |
 | :--- | :--- |
 | 机器 | 1× NVIDIA RTX 5090 32GB（32607 MiB，驱动 610.57.04）+ Intel i9-14900KF（32 线程） |
-| GPU 显存占用 | ~10.5 GB |
+| GPU 显存占用 | ~20.5 GB |
 | batch | 32 |
 | 精度 | bfloat16 |
-| 显存优化 | gradient_checkpointing=true<br />freeze_vision_encoder=true<br />train_expert_only=true<br />compile_model=true（max-autotune） |
-| 可学习参数 | 578M（仅 action expert 解冻） |
-| 单步耗时 | ~1.92 s/step |
-| 含 eval/保存的实测吞吐 | ~2.30 s/step |
+| 显存优化 | gradient_checkpointing=true<br />freeze_vision_encoder=true<br />train_expert_only=true<br />compile_model=true |
 | 训练步数 | 30000 |
 | 数据时长 | 35s |
 | 数据数量 | 300 条 |
-| 该段耗时 | ≈ 16.3 h |
+| 该段耗时 | ~16.3 h |
 
-### 数据集格式说明 v2.1 vs v3.0
+### 数据集格式说明
 
 :::info 说明
 
-训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。
+lerobot存在v2.1与v3.0两种数据集格式，本次使用训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。
 :::
 
 **v2.1 — fold_the_towel**
@@ -234,7 +231,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 :::warning 注意
 
 - 用 v2.1 数据集直接训练时，lerobot 0.6.2 会抛出 `BackwardCompatibilityError`。按 [环境准备](#环境准备) 中的命令先转成 v3.0。
-- v2.1 和 v3.0 的特征名都是扁平名（如 `head_cam`、`state`），策略需要的是 `observation.images.*` 和 `observation.state`。训练时加上 `--rename_map`，映射示例见 [训练命令](#训练命令)。
+- 本次使用数据集的特征名都是扁平名（如 `head_cam`、`state`），策略需要的是 `observation.images.*` 和 `observation.state`。训练时加上 `--rename_map`，映射示例见 [训练命令](#训练命令)。
 - `info.json.features.*.info.video.codec` 为 `av1` 时，解码依赖 `ffmpeg`。需在训练机安装 `ffmpeg`，并确认它在 `PATH` 中。
 
 :::
@@ -371,7 +368,7 @@ calibration:{dataset_type: vla_dataset, vla_image_path/vla_action_calib_data/vla
              calibration_step: 30, calib_ckpt_save_path: ./calib_ckpt}
 evaluation: {norm_stats_path: .../norm_stats.json, eval_stages: [calib], dump_dir: ./eval_dump}
 compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # lm 关 HPC（(256*3+48)%32 问题，见「数据/配置配比」）
-action:{enable_hpc: true,  core_num: 4}}         # action 开 HPC
+action:     {enable_hpc: true,  core_num: 4}}         # action 开 HPC
 ```
 
 量化方案（pi0_model.py::get_qconfig_setting("action")）：
@@ -472,7 +469,7 @@ pi0/
 }
 ```
 
-**pi0_network_demo.json**
+**demo.json**
 
 ```jsonc
 {
@@ -564,6 +561,7 @@ export HB_DNN_USER_DEFINED_L2M_SIZES=6:6:6:6
 客户端（`pi0_toolkit/deploy/vla_robot` 交付包：纯 Python、双臂 piper_sdk 直控 CAN，不依赖 ROS，控制包作为参考，可进一步优化；用法见下，详见 vla_robot/README.md）：
 
 ```bash
+# vla_robot见工具包
 cd vla_robot
 bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + 装依赖 + 写路径 (幂等)
 
@@ -616,7 +614,7 @@ bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + �
 - 请求 → 响应：客户端发 images/languages/states（+可选 field 5/6 RTC 约束），板端回同型 MultiModalInput，动作放 languages\[0\]（dtype 为 FLOAT64 或 FP16，shape = \[action_horizon, action_dim\] 的原始维度）。
 - pi0 的 state 走 states 张量（inject_state=false，不进 prompt）：客户端发原始值，由 runtime host 侧归一化（见下）。
 
-### 请求张量的格式与归一化
+### 请求格式与归一化
 
 | 字段 | dtype | shape | 内容 | 是否归一化 |
 | :--- | :--- | :--- | :--- | :--- |
@@ -653,7 +651,7 @@ bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + �
 | 动作完全不对 | use_absolute_action 缺省 false（又叠一次 state） | use_absolute_action=true | 量级 1.99 → 1.00 |
 | norm_stats 初始化失败 | norm_stats.json 只有 actions 缺 state | 用 norm_stats_runtime.json（含 state） | — |
 
-### 数据/配置配比
+### 数据 / 配置
 
 | 项 | 训练侧 | 板端 |
 | :--- | :--- | :--- |
