@@ -44,6 +44,55 @@ sidebar_position: 2
 </video>
 
 
+## 硬件清单
+
+:::info 说明
+
+Pi0 & Pi05 不要求使用指定的机械臂或结构，下表仅为参考硬件清单。更换其他机械臂、其他结构同样可以，但需要重新采集数据、重新训练并重新量化编译。
+
+:::
+
+<table style={{ width: '100%', tableLayout: 'fixed' }}>
+  <thead>
+    <tr>
+      <th style={{ width: '30%', textAlign: 'left' }}>设备名称</th>
+      <th style={{ width: '10%', textAlign: 'center' }}>数量</th>
+      <th style={{ width: '60%', textAlign: 'center' }}>图片</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ textAlign: 'left' }}>RDK S600 开发套件</td>
+      <td style={{ textAlign: 'center' }}>1</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-s600.png" alt="S600" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}>松灵 Piper 机械臂</td>
+      <td style={{ textAlign: 'center' }}>2</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-piper-arm.png" alt="松灵 Piper 机械臂" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}>RealSense D435i</td>
+      <td style={{ textAlign: 'center' }}>3</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-realsense-d435i.png" alt="RealSense D435i" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}><a href="https://item.taobao.com/item.htm?abbucket=8&id=974751867024&mi_id=0000eLg1N9QR502J2CBUHxOfpRPt9cByxrbm1jAe-jpstnE&ns=1&priceTId=214783b717782310374276066e114a&spm=a21n57.1.hoverItem.1&utparam=%7B%22aplus_abtest%22%3A%226f11ecbc5161fe03b0256a3dbc22db84%22%7D&xxc=taobaoSearch">机械臂支架</a></td>
+      <td style={{ textAlign: 'center' }}>1</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-arm-stand.png" alt="机械臂支架" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_wrist_camera_mount.step">手部相机 3D 打印件</a></td>
+      <td style={{ textAlign: 'center' }}>2</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-wrist-camera-mount.png" alt="手部相机 3D 打印件" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_mid_camera_mount(low).step">头部相机 3D 打印件</a></td>
+      <td style={{ textAlign: 'center' }}>1</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-head-camera-mount.png" alt="头部相机 3D 打印件" width="30%" /></td>
+    </tr>
+  </tbody>
+</table>
 
 ## 获取工具包
 
@@ -70,7 +119,7 @@ wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_toolkit.
   pip install -e ".[all]"     # Everything (all policies, envs, hardware, dev tools)
   ```
 
-- 数据集格式：训练用 v3.0（`CODEBASE_VERSION=v3.0`），v2.1 需先转 v3.0（`convert_dataset_v21_to_v30.py`）。v2.1/v3.0 的目录结构对照见 [数据集格式说明](#数据集格式说明-v21-vs-v30)。本地数据转换指令如下：
+- 数据集格式：训练用 v3.0（`CODEBASE_VERSION=v3.0`），v2.1 需先转 v3.0（`convert_dataset_v21_to_v30.py`）。v2.1/v3.0 的目录结构对照见 [数据集格式说明](#数据集格式说明)。本地数据转换指令如下：
 
   ```bash
   python lerobot/src/lerobot/scripts/convert_dataset_v21_to_v30.py  \
@@ -82,7 +131,7 @@ wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_toolkit.
 
     - 训练依赖两份 Hugging Face 资源：
 
-      - 预训练权重 `lerobot/pi0_base`，若可以正常访问 Hugging Face，则不必提前下载，训练时`lerobot-train` 会按仓库名自动拉取。若网络较差，可参考下方命令，先下载权重到本地，训练时设置 `HF_HUB_OFFLINE=1`，并更换路径即可。
+      - 预训练权重 `lerobot/pi0_base`，若可以正常访问 Hugging Face，则不必提前下载，训练时 `lerobot-train` 会按仓库名自动拉取。若网络较差，可参考下方命令，先下载权重到本地，训练时设置 `HF_HUB_OFFLINE=1`，并更换路径即可。
 
       - `google/paligemma-3b-pt-224` 是 gated 模型，下载前需要先授权：登录 [Hugging Face](https://huggingface.co)，打开 [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224)，点击 Acknowledge license 同意 Gemma 使用许可，填写信息获取授权后，即可下载模型。
 
@@ -172,7 +221,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 
 :::info 说明
 
-lerobot存在v2.1与v3.0两种数据集格式，本次使用训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。
+lerobot 存在 v2.1 与 v3.0 两种数据集格式。本次使用的训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。
 :::
 
 **v2.1 — fold_the_towel**
@@ -231,7 +280,7 @@ lerobot存在v2.1与v3.0两种数据集格式，本次使用训练环境 lerobot
 :::warning 注意
 
 - 用 v2.1 数据集直接训练时，lerobot 0.6.2 会抛出 `BackwardCompatibilityError`。按 [环境准备](#环境准备) 中的命令先转成 v3.0。
-- 本次使用数据集的特征名都是扁平名（如 `head_cam`、`state`），策略需要的是 `observation.images.*` 和 `observation.state`。训练时加上 `--rename_map`，映射示例见 [训练命令](#训练命令)。
+- 本次使用的数据集特征名都是扁平名（如 `head_cam`、`state`），策略需要的是 `observation.images.*` 和 `observation.state`。训练时加上 `--rename_map`，映射示例见 [训练命令](#训练命令)。
 - `info.json.features.*.info.video.codec` 为 `av1` 时，解码依赖 `ffmpeg`。需在训练机安装 `ffmpeg`，并确认它在 `PATH` 中。
 
 :::
@@ -367,7 +416,7 @@ model:      {model_name: Pi0, model_path: .../model_060000, model_list: [visual,
 calibration:{dataset_type: vla_dataset, vla_image_path/vla_action_calib_data/vla_prompt_path: ...,
              calibration_step: 30, calib_ckpt_save_path: ./calib_ckpt}
 evaluation: {norm_stats_path: .../norm_stats.json, eval_stages: [calib], dump_dir: ./eval_dump}
-compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # lm 关 HPC（(256*3+48)%32 问题，见「数据/配置配比」）
+compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # lm 关 HPC（(256*3+48)%32 问题，见「数据 / 配置」）
 action:     {enable_hpc: true,  core_num: 4}}         # action 开 HPC
 ```
 
@@ -561,7 +610,7 @@ export HB_DNN_USER_DEFINED_L2M_SIZES=6:6:6:6
 客户端（`pi0_toolkit/deploy/vla_robot` 交付包：纯 Python、双臂 piper_sdk 直控 CAN，不依赖 ROS，控制包作为参考，可进一步优化；用法见下，详见 vla_robot/README.md）：
 
 ```bash
-# vla_robot见工具包
+# vla_robot 见工具包
 cd vla_robot
 bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + 装依赖 + 写路径 (幂等)
 
@@ -640,7 +689,7 @@ bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + �
 | :--- | :--- | :--- |
 | 加载卡死 / 访问 huggingface 超时 | 离线环境仍尝试联网 | HF_HUB_OFFLINE=1；base 权重走 hf-mirror 镜像本地化 |
 | tokenizer 加载失败（gated） | google/paligemma-3b-pt-224 需授权 | 本地下载并改 pi05_base/policy_preprocessor.json 路径；训练后 ckpt 自带 tokenizer/ |
-| v2.1 数据集读不了 | lerobot ≥0.4 抛 BackwardCompatibilityError | 训练/校准用 v3.0；v2.1 用 drrm(0.3.3) 或先转 v3.0（格式差异见 [数据集格式说明](#数据集格式说明-v21-vs-v30)） |
+| v2.1 数据集读不了 | lerobot ≥0.4 抛 BackwardCompatibilityError | 训练/校准用 v3.0；v2.1 用 drrm(0.3.3) 或先转 v3.0（格式差异见 [数据集格式说明](#数据集格式说明)） |
 | 数据集 key 是扁平名 | 训练特征名与策略不符 | --rename_map 映射 head_cam→observation.images.head_cam 等 |
 
 ### 板端运行时

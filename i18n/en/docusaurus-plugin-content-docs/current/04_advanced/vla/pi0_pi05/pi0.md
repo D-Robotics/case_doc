@@ -46,6 +46,58 @@ On-device deployment and running
 
 
 
+## Hardware List
+
+The Pi0 & Pi05 fold-the-towel real-robot task uses the same hardware as [HoloBrain General Object Grasping (Real Robot)](/advanced/vla/holobrain); the table below can be reused as-is.
+
+:::info Note
+
+Pi0 & Pi05 do not require a specific robotic arm or structure — the table below is only a reference hardware list. Other arms and other structures work just as well, but you must re-collect the data, retrain, and re-quantize/compile.
+
+:::
+
+<table style={{ width: '100%', tableLayout: 'fixed' }}>
+  <thead>
+    <tr>
+      <th style={{ width: '30%', textAlign: 'left' }}>Equipment</th>
+      <th style={{ width: '10%', textAlign: 'center' }}>Qty</th>
+      <th style={{ width: '60%', textAlign: 'center' }}>Image</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{ textAlign: 'left' }}>RDK S600 development kit</td>
+      <td style={{ textAlign: 'center' }}>1</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-s600.png" alt="S600" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}>AgileX Piper robotic arm</td>
+      <td style={{ textAlign: 'center' }}>2</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-piper-arm.png" alt="AgileX Piper robotic arm" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}>RealSense D435i</td>
+      <td style={{ textAlign: 'center' }}>3</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-realsense-d435i.png" alt="RealSense D435i" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}><a href="https://item.taobao.com/item.htm?abbucket=8&id=974751867024&mi_id=0000eLg1N9QR502J2CBUHxOfpRPt9cByxrbm1jAe-jpstnE&ns=1&priceTId=214783b717782310374276066e114a&spm=a21n57.1.hoverItem.1&utparam=%7B%22aplus_abtest%22%3A%226f11ecbc5161fe03b0256a3dbc22db84%22%7D&xxc=taobaoSearch">Robotic arm stand</a></td>
+      <td style={{ textAlign: 'center' }}>1</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-arm-stand.png" alt="Robotic arm stand" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_wrist_camera_mount.step">Wrist camera 3D-printed mount</a></td>
+      <td style={{ textAlign: 'center' }}>2</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-wrist-camera-mount.png" alt="Wrist camera 3D-printed mount" width="30%" /></td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: 'left' }}><a href="https://github.com/HorizonRobotics/RoboOrchardHardware/blob/master/3d_print_assets/d435_mid_camera_mount(low).step">Head camera 3D-printed mount</a></td>
+      <td style={{ textAlign: 'center' }}>1</td>
+      <td style={{ textAlign: 'center' }}><img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-head-camera-mount.png" alt="Head camera 3D-printed mount" width="30%" /></td>
+    </tr>
+  </tbody>
+</table>
+
 ## Get the toolkit
 
 ```shell
@@ -73,7 +125,7 @@ Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
   pip install -e ".[all]"     # Everything (all policies, envs, hardware, dev tools)
   ```
 
-- Dataset format: training uses v3.0 (`CODEBASE_VERSION=v3.0`); v2.1 must first be converted to v3.0 (`convert_dataset_v21_to_v30.py`). For the v2.1/v3.0 directory structure comparison, see [Dataset format: v2.1 vs v3.0](#dataset-format-v21-vs-v30). The local data conversion command is:
+- Dataset format: training uses v3.0 (`CODEBASE_VERSION=v3.0`); v2.1 must first be converted to v3.0 (`convert_dataset_v21_to_v30.py`). For the v2.1/v3.0 directory structure comparison, see [Dataset format](#dataset-format). The local data conversion command is:
 
   ```bash
   python lerobot/src/lerobot/scripts/convert_dataset_v21_to_v30.py  \
@@ -85,7 +137,7 @@ Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
 
     - Training depends on two Hugging Face resources:
 
-      - The pretrained weights `lerobot/pi0_base`, and the tokenizer `google/paligemma-3b-pt-224` that `tokenizer_name` points to in its `policy_preprocessor.json`. If you can access Hugging Face and do not set `HF_HUB_OFFLINE=1` during training, you do not need to download them in advance; `lerobot-train` pulls them automatically by repository name. The training command below sets `HF_HUB_OFFLINE=1`, so you must complete the local preparation first.
+      - The pretrained weights `lerobot/pi0_base`. If you can reach Hugging Face normally, you do not need to download them in advance; `lerobot-train` pulls them automatically by repository name. If your network is poor, follow the commands below to download the weights locally first, then set `HF_HUB_OFFLINE=1` when training and point `--policy.pretrained_path` at the local copy.
 
       - `google/paligemma-3b-pt-224` is a gated model, so you must be granted access before downloading it: sign in to [Hugging Face](https://huggingface.co), open [google/paligemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224), click Acknowledge license to accept the Gemma license, fill in your information, and once access is granted, you can download the model.
 
@@ -123,12 +175,14 @@ HF_HUB_OFFLINE=1 lerobot-train \
     --policy.compile_model=true \
     --policy.gradient_checkpointing=true \
     --policy.dtype=bfloat16 \
-    --policy.freeze_vision_encoder=false \
-    --policy.train_expert_only=false \
+    --policy.freeze_vision_encoder=true \
+    --policy.train_expert_only=true \
     --policy.push_to_hub=false \
     --steps=30000 \
     --policy.device=cuda \
     --batch_size=32 \
+    --wandb.enable=true \
+    --wandb.project=pi0_training \
     --rename_map '{"state":"observation.state","head_cam":"observation.images.head_cam",
 "left_cam":"observation.images.left_cam","right_cam":"observation.images.right_cam"}'
 
@@ -147,7 +201,6 @@ HF_HUB_OFFLINE=1 lerobot-train \
 | policy | pi0 (gemma_2b + gemma_300m) |
 | batch | 32 |
 | steps | 30000 |
-| lr | AdamW 2.5e-5<br />cosine + warmup 1000<br />decay 30000 |
 | dtype | bfloat16<br />compile_model=true<br />compile_mode=max-autotune |
 | freeze | true |
 | train_expert_only | true |
@@ -155,30 +208,26 @@ HF_HUB_OFFLINE=1 lerobot-train \
 | action / state | 14-dim output (padded to 32); 14-dim state (padded to 32) |
 | normalization | ACTION/STATE=MEAN_STD<br />VISUAL=IDENTITY |
 | tokenizer | tokenizer_max_length=48 |
-| Deployment | type=pi0<br />chunk_size=50<br />n_action_steps=50<br />num_inference_steps=10<br />compile_model=true<br />image_resolution=\[224,224\]<br />use_relative_actions=false<br />control_fps=30 |
 
 **Training resources and time**
 
 | Item | Value |
 | :--- | :--- |
 | Machine | 1× NVIDIA RTX 5090 32GB (32607 MiB, driver 610.57.04) + Intel i9-14900KF (32 threads) |
-| GPU memory usage | ~10.5 GB |
+| GPU memory usage | ~20.5 GB |
 | batch | 32 |
 | Precision | bfloat16 |
-| Memory optimization | gradient_checkpointing=true<br />freeze_vision_encoder=true<br />train_expert_only=true<br />compile_model=true (max-autotune) |
-| Trainable parameters | 578M (only the action expert is unfrozen) |
-| Time per step | ~1.92 s/step |
-| Measured throughput including eval/save | ~2.30 s/step |
+| Memory optimization | gradient_checkpointing=true<br />freeze_vision_encoder=true<br />train_expert_only=true<br />compile_model=true |
 | Training steps | 30000 |
 | Data duration | 35s |
 | Number of samples | 300 |
-| Time for this stage | ≈ 16.3 h |
+| Time for this stage | ~16.3 h |
 
-### Dataset format: v2.1 vs v3.0
+### Dataset format
 
 :::info
 
-The training environment lerobot (0.6.2, CODEBASE_VERSION=v3.0) can read only v3.0.
+lerobot has two dataset formats, v2.1 and v3.0. The training environment used here, lerobot (0.6.2, CODEBASE_VERSION=v3.0), can read only v3.0.
 :::
 
 **v2.1 — fold_the_towel**
@@ -237,7 +286,7 @@ The training environment lerobot (0.6.2, CODEBASE_VERSION=v3.0) can read only v3
 :::warning
 
 - If you train directly on a v2.1 dataset, lerobot 0.6.2 throws `BackwardCompatibilityError`. Convert it to v3.0 first with the commands in [Environment setup](#environment-setup).
-- The feature names in both v2.1 and v3.0 are flat names (such as `head_cam` and `state`), while the policy expects `observation.images.*` and `observation.state`. Add `--rename_map` during training; for a mapping example, see [Training command](#training-command).
+- The feature names in the datasets used here are all flat names (such as `head_cam` and `state`), while the policy expects `observation.images.*` and `observation.state`. Add `--rename_map` during training; for a mapping example, see [Training command](#training-command).
 - When `info.json.features.*.info.video.codec` is `av1`, decoding depends on `ffmpeg`. Install `ffmpeg` on the training machine and make sure it is on `PATH`.
 
 :::
@@ -373,8 +422,8 @@ model:      {model_name: Pi0, model_path: .../model_060000, model_list: [visual,
 calibration:{dataset_type: vla_dataset, vla_image_path/vla_action_calib_data/vla_prompt_path: ...,
              calibration_step: 30, calib_ckpt_save_path: ./calib_ckpt}
 evaluation: {norm_stats_path: .../norm_stats.json, eval_stages: [calib], dump_dir: ./eval_dump}
-compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # HPC disabled for lm ((256*3+48)%32 issue, see "Data/configuration alignment")
-action:{enable_hpc: true,  core_num: 4}}         # HPC enabled for action
+compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # HPC disabled for lm ((256*3+48)%32 issue, see "Data / configuration")
+action:     {enable_hpc: true,  core_num: 4}}         # HPC enabled for action
 ```
 
 Quantization scheme (pi0_model.py::get_qconfig_setting("action")):
@@ -475,7 +524,7 @@ pi0/
 }
 ```
 
-**pi0_network_demo.json**
+**demo.json**
 
 ```jsonc
 {
@@ -567,6 +616,7 @@ export HB_DNN_USER_DEFINED_L2M_SIZES=6:6:6:6
 Client (the `pi0_toolkit/deploy/vla_robot` delivery package: pure Python, dual-arm control of CAN directly through piper_sdk, no ROS dependency; the control package is a reference and can be optimized further; for usage see below, and vla_robot/README.md for details):
 
 ```bash
+# vla_robot is in the toolkit
 cd vla_robot
 bash setup.sh                 # Run once on first use or after migrating: create the shared venv + install dependencies + write paths (idempotent)
 
@@ -619,7 +669,7 @@ bash setup.sh                 # Run once on first use or after migrating: create
 - Request → response: the client sends images/languages/states (plus the optional RTC constraints in fields 5/6), and the board returns a MultiModalInput of the same type, with the actions placed in languages\[0\] (dtype FLOAT64 or FP16, with shape = the original dimensions \[action_horizon, action_dim\]).
 - pi0 sends state through the states tensor (inject_state=false, so it never enters the prompt): the client sends raw values and the runtime host side normalizes them (see below).
 
-### Request tensor format and normalization
+### Request format and normalization
 
 | Field | dtype | shape | Content | Normalized |
 | :--- | :--- | :--- | :--- | :--- |
@@ -645,7 +695,7 @@ bash setup.sh                 # Run once on first use or after migrating: create
 | :--- | :--- | :--- |
 | Loading hangs / requests to Hugging Face time out | An offline environment still tries to reach the network | HF_HUB_OFFLINE=1; mirror the base weights locally through hf-mirror |
 | tokenizer fails to load (gated) | google/paligemma-3b-pt-224 requires authorization | Download locally and change the path in pi05_base/policy_preprocessor.json; the ckpt saved after training carries its own tokenizer/ |
-| A v2.1 dataset cannot be read | lerobot ≥0.4 throws BackwardCompatibilityError | Use v3.0 for training/calibration; for v2.1 use drrm(0.3.3) or convert to v3.0 first (for the format differences see [Dataset format: v2.1 vs v3.0](#dataset-format-v21-vs-v30)) |
+| A v2.1 dataset cannot be read | lerobot ≥0.4 throws BackwardCompatibilityError | Use v3.0 for training/calibration; for v2.1 use drrm(0.3.3) or convert to v3.0 first (for the format differences see [Dataset format](#dataset-format)) |
 | The dataset keys are flat names | The training feature names do not match the policy | Use --rename_map to map head_cam→observation.images.head_cam and so on |
 
 ### On-device runtime
@@ -656,7 +706,7 @@ bash setup.sh                 # Run once on first use or after migrating: create
 | Actions are completely wrong | use_absolute_action defaults to false (state is added again) | use_absolute_action=true | Magnitude 1.99 → 1.00 |
 | norm_stats fails to initialize | norm_stats.json contains only actions and no state | Use norm_stats_runtime.json (which contains state) | — |
 
-### Data/configuration alignment
+### Data / configuration
 
 | Item | Training side | On-device |
 | :--- | :--- | :--- |
