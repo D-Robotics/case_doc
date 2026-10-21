@@ -287,6 +287,24 @@ lerobot 存在 v2.1 与 v3.0 两种数据集格式。本次使用的训练环境
 
 ## 量化编译
 
+### 获取 SDK
+
+量化编译需要获取官网最新的 LLM SDK 并解压。
+
+```bash
+mkdir -p ~/VLA/oe_llm_s600/pi0_sdk
+cd ~/VLA/oe_llm_s600/pi0_sdk
+wget https://archive.d-robotics.cc/toolchain/llm/s100_s600_llm/llm_2.0.0/D-Robotics_LLM_2.0.0_S600_S100_SDK.tar.gz
+tar -xzf D-Robotics_LLM_2.0.0_S600_S100_SDK.tar.gz
+export SDK=$HOME/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+```
+
+:::info 说明
+
+`~/VLA` 只是示例工作目录，可替换为任意路径，只要 `export SDK` 指向实际的 SDK 根目录即可。
+
+:::
+
 ### 环境准备
 
 ```bash
