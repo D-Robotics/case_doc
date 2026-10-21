@@ -439,16 +439,40 @@ TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 bash "$SDK/llm_compression/scripts/torch_eval
 TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 bash "$SDK/llm_compression/scripts/compile.sh" --config_path "$PWD/sdk20/case.yml"
 ```
 
-`pi0.yml` 关键项：
+`sdk20/case.yml` 关键项：
 
 ```yaml
-model:      {model_name: Pi0, model_path: .../model_060000, model_list: [visual,lm,action],
-             model_dtype: bfloat16, max_token_len: 48, enable_time_mod_lut: false}
-calibration:{dataset_type: vla_dataset, vla_image_path/vla_action_calib_data/vla_prompt_path: ...,
-             calibration_step: 30, calib_ckpt_save_path: ./calib_ckpt}
-evaluation: {norm_stats_path: .../norm_stats.json, eval_stages: [calib], dump_dir: ./eval_dump}
-compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # lm 关 HPC（(256*3+48)%32 问题，见「数据 / 配置」）
-action:     {enable_hpc: true,  core_num: 4}}         # action 开 HPC
+model:
+  type: Pi0
+  # path、norm_stats_path 由准备脚本填写
+  model_list: [visual, lm, action]
+  model_dtype: bfloat16
+  q_config: performance
+  vision_token_num: 256
+  num_views: 3
+  action_horizon: 50
+  max_token_len: 48
+  discrete_state_input: false
+  valid_state_dim: null
+  enable_time_mod_lut: false
+calibration:
+  dataset_type: vla_dataset
+  calibration_step: 30
+  # data_path 指向 sdk20/samples.json
+evaluation:
+  dataset_type: vla_dataset
+  eval_step: 30
+  use_delta_joint_actions: false
+  use_quantiles_norm: false
+  vla_eval:
+    eval_stages: [calib]
+    valid_action_dim: 14
+    skip_dump_if_exists: false
+compile:
+  opt_level: 2
+  jobs: 32
+  lm: {enable_hpc: true, core_num: 4, max_l2m_size: 25165824}
+  action: {enable_hpc: false, core_num: 4, max_l2m_size: 25165824}
 ```
 
 量化方案（pi0_model.py::get_qconfig_setting("action")）：
