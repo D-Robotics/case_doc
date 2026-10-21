@@ -151,6 +151,7 @@ const config = {
   ],
   plugins: [
     require.resolve("./src/plugins/sidebar-scope-config-plugin"),
+    require.resolve("./src/plugins/localized-404-redirect-plugin"),
     [
       "@docusaurus/plugin-client-redirects",
       {
