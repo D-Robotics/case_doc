@@ -424,21 +424,19 @@ python3 pi0_s600/host/prepare_sdk20.py \
 
 ### 量化编译
 
-在 `pi0_conver/` 下启动
-
 ```bash
-#使用 oellm 环境
 conda activate oellm
+cd ~/VLA/oe_llm_s600/pi0_conver
+export PYTHONPATH="$SDK:$SDK/llm_compression/lightcompress:${PYTHONPATH:-}"
 
-cd oe_llm_s600/pi0_conver
-
-export PYTHONPATH="<D-Robotics_LLM_S600_2.0.0-Beta_SDK_path>:<D-Robotics_LLM_S600_2.0.0-Beta_SDK_path>/llm_compression/lightcompress:oe_llm_s600/pi0_conver"
-
-# 将 run.py和 pi0_pkg 放到 oe_llm_s600/pi0_conver 下，脚本与 pkg 包见 pi0_toolkit
-python run.py float_eval  --config_path pi0_float.yml  # 1) 浮点基线 + 参考 dump
-python run.py calib   --config_path pi0.yml     # 2) 校准（生成 calib_ckpt/）
-python run.py calib_eval   --config_path pi0.yml # 3) 伪量化精度（yml 里 calib_ckpt_load_path=./calib_ckpt）
-python run.py compile   --config_path pi0.yml   # 4) 编译 HBM（纯 CPU，lm 约 2~3h）
+# 1. 浮点参考
+python3 ~/VLA/pi0_s600/host/native_float_reference.py --config_path "$PWD/sdk20/float.yml"
+# 2. 校准，调用官网 calib.py，关闭梯度记录
+python3 ~/VLA/pi0_s600/host/calib_no_grad.py --config_path "$PWD/sdk20/case.yml"
+# 3. 伪量化评估
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 bash "$SDK/llm_compression/scripts/torch_eval.sh" --config_path "$PWD/sdk20/case.yml"
+# 4. 编译 HBM
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 bash "$SDK/llm_compression/scripts/compile.sh" --config_path "$PWD/sdk20/case.yml"
 ```
 
 `pi0.yml` 关键项：
