@@ -309,6 +309,7 @@ export SDK=$HOME/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
 
 ```bash
 conda create -n oellm python=3.10 -y
+conda activate oellm
 pip install torch==2.8.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 pip install $SDK/package/host/*.whl          # horizon / hbdk / hbm
 pip install -r $SDK/llm_compression/requirements.txt
