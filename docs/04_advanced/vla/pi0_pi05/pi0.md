@@ -495,18 +495,53 @@ compile:
 
 ## 板端部署与运行
 
-把 SDK 放到板端，重点关注 `D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/examples/vla_demo/pi0`，运行前需执行以下命令给 `vla_sdk_demo` 赋执行权限：`chmod +x vla_sdk_demo`
+将三个编译产物、SDK 和新源码包导入板端。
+
+- 源码包解压到 `/root/VLA/pi0_s600`，SDK 解压到 `/root/VLA/oe_llm_s600/pi0_sdk`。
+- 三个 HBM 放到 `/root/VLA/pi0_models`，文件名沿用 `sdk20/compile/` 的输出。
+- 同时放入 `norm_stats_runtime.json`（改名为 `norm_stats.json`），以及 PaliGemma 的 `tokenizer.json`、`tokenizer_config.json`、`tokenizer.model`（改名为 `paligemma_tokenizer.model`）。统计量必须包含 state 和 actions。
 
 ### 运行所需文件
 
+模型资源（`/root/VLA/pi0_models`）：
+
 ```text
-pi0/
-├── xxxx_{vision,llm,action}_*.hbm             # 阶段二产物，三个模型
-├── norm_stats.json                            # 板端运行时 norm stats（含 state+actions，由prep_pi0生成）
-├── tokenizer.json / tokenizer_config.json     # 位于paligemma-3b-pt-224下
-├── paligemma_tokenizer.model                  # paligemma-3b-pt-224下，tokenizer.model重命名
-├── pi0_config.json                            # oellm 模型配置（oellm_runtime/examples/vla_demo/pi0下）
-└── demo.json                                  # demo 配置 (network, 127.0.0.1:30005, oellm_runtime/examples/vla_demo/pi0下)
+/root/VLA/pi0_models/
+├── model_030000_vision_224x224_w8_nash-p_corenum_1.hbm
+├── model_030000_language_w8_nash-p_corenum_4.hbm
+├── model_030000_action_ah_50_w8_nash-p_corenum_4.hbm
+├── norm_stats.json                            # norm_stats_runtime.json 改名，必须含 state + actions
+├── paligemma_tokenizer.model                  # tokenizer.model 改名
+└── tokenizer.json / tokenizer_config.json
+```
+
+案例配置（`/root/VLA/pi0_s600`）：
+
+```text
+/root/VLA/pi0_s600/
+├── configs/runtime.json                       # configure.py 生成的模型配置
+├── configs/network.json                       # 网络配置（127.0.0.1:30005）
+└── configs/client.yaml                        # 客户端与机械臂配置
+```
+
+### 构建运行时
+
+安装板端构建依赖，然后应用补丁、构建 full runtime 并生成案例配置：
+
+```bash
+apt-get update
+apt-get install -y build-essential cmake pkg-config libopencv-dev libprotobuf-dev \
+  protobuf-compiler python3-venv ffmpeg patch
+
+export SDK=/root/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+python3 /root/VLA/pi0_s600/tools/apply_sdk_patches.py --sdk "$SDK" --scope board
+source "$SDK/oellm_runtime_s600/env.sh" 4
+cd "$SDK/oellm_runtime_s600/examples/vla_demo/pi0"
+BUILD_TARGET=full MODE=full bash build_demo.sh
+cd /root/VLA/pi0_s600
+bash case_client/setup.sh
+./case_client/.venv/bin/python -m pip install pillow pyarrow
+./case_client/.venv/bin/python board/configure.py --model-dir /root/VLA/pi0_models
 ```
 
 ### 运行时配置参考
