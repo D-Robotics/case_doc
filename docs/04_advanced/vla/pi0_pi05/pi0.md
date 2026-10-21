@@ -97,7 +97,7 @@ Pi0 & Pi05 不要求使用指定的机械臂或结构，下表仅为参考硬件
 ## 获取工具包
 
 ```shell
-wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_toolkit.tar.gz
+wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_s600.tar.gz
 ```
 
 ## 训练
