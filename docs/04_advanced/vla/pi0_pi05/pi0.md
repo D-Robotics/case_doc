@@ -332,18 +332,32 @@ mkdir oe_llm_s600/pi0_conver
 
 ### 数据与模型准备
 
-用 `pi0_toolkit/tool/prep_pi0.py` 一个脚本搞定：模型目录+ 校准数据 + `norm_stats_runtime.json` + 量化用需配置。
+用 `pi0_s600/host/prep_pi0.py` 生成模型目录、校准数据、`norm_stats_runtime.json` 与量化所需配置，再用 `prepare_sdk20.py` 生成官方 SDK 的 `samples.json` 与 `sdk20/` 配置。
 
 ```bash
-# 使用 lerobot 环境 (lerobot 0.6.2, 读 v3.0)
+cd ~/VLA
 conda activate lerobot
+python3 pi0_s600/host/prep_pi0.py \
+  --ckpt-dir lerobot/outputs/pi0_training/checkpoints/030000 \
+  --dataset-root /home/wunuo/VLA/TeleManipulation/data/lerobot_dataset/D-Robotics/fold_the_towel_remap_v3 \
+  --output-dir oe_llm_s600/pi0_conver \
+  --num-samples 30 \
+  --tokenizer lerobot/paligemma-3b-pt-224/tokenizer.model --copy-tokenizer
 
-python3 tool/prep_pi0.py \
-  --ckpt-dir     <model_path xxx/checkpoints/xxxx> \
-  --dataset-root <lerobot_v3data_path lerobot_dataset/xxx> \
-  --output-dir   oe_llm_s600/pi0_conver \
-  --num-samples  30
+conda activate oellm
+python3 pi0_s600/tools/apply_sdk_patches.py --sdk "$SDK" --scope host
+python3 pi0_s600/host/prepare_sdk20.py \
+  --assets oe_llm_s600/pi0_conver \
+  --checkpoint lerobot/outputs/pi0_training/checkpoints/030000
 ```
+
+:::info 说明
+
+- `~/VLA` 只是示例工作目录，可换为现有目录；数据路径按实际修改。
+- Pi0 的 state 作为连续张量输入：按 checkpoint 的 MEAN_STD 处理后补零到 32 维，不注入文本。
+- host 位置编号/attention 补丁与板端位置编号补丁配套使用。
+
+:::
 
 <div className="markdown-table-scroll">
 <table>
