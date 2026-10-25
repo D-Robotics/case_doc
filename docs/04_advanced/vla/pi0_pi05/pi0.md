@@ -634,53 +634,53 @@ bash case_client/setup.sh
 
 ### 开环测试
 
-不开硬件/遥控，用 GT 观测（图像 + state）逐步喂板端 HBM，把预测动作与 GT 对比。板端脚本 `pi0_toolkit/deploy/openloop_infer_piper.py`（+ 同目录 `plot_openloop_npz.py`，跑完自动出图）。
+不开硬件或遥控，用 GT 观测（图像 + state）逐步喂板端 HBM，把预测动作与 GT 对比。板端脚本为 `pi0_s600/board/openloop_infer_piper.py`。
 
 **数据获取（训练机侧）**
 
-用 `pi0_toolkit/tool/extract_episodes_v3.py` 从 v3.0 数据集抽取指定 episode：
+用 `pi0_s600/host/extract_episodes_v3.py` 从 v3.0 数据集抽取指定 episode。`--dataset-root` 指向实际 v3.0 数据目录，输出目录以 `eval_data` 为例：
 
 ```bash
 conda activate lerobot
 # 抽 episode 0/3/5，每个 episode 每 30 帧一条（≈ 每个 chunk 起点）
-python3 extract_episodes_v3.py --episodes 0 3 5 --stride 30 -o <out>
+python3 pi0_s600/host/extract_episodes_v3.py \
+  --dataset-root <v3.0 数据目录> \
+  --episodes 0 3 5 --stride 30 -o eval_data
 # 每个 episode 均匀抽 20 条：加 --num-per-episode 20
 ```
 
-产出 `openloop_infer_piper.py --eval-data` 需要的布局：
+将 `eval_data` 导入板端 `/root/VLA/eval_data`。产出布局：
 
 ```text
-<out>/calib_image/<sid>/image_{0,1,2}.jpg        # head_cam, left_cam, right_cam
-<out>/action_calib_data/<sid>/state.npy          # [14] raw
-<out>/action_calib_data/<sid>/action.npy         # [14] GT (chunk step0, raw)
-<out>/action_calib_data/<sid>/x_t.npy            # [50,32]（板端不用）
-<out>/prompt.json · norm_stats.json · manifest.json
+eval_data/calib_image/<sid>/image_{0,1,2}.jpg        # head_cam, left_cam, right_cam
+eval_data/action_calib_data/<sid>/state.npy          # [14] raw
+eval_data/action_calib_data/<sid>/action.npy         # [14] GT (chunk step0, raw)
+eval_data/action_calib_data/<sid>/x_t.npy            # [50,32]（板端不用）
+eval_data/prompt.json · norm_stats.json · manifest.json
 ```
 
 **板端开环**
 
-将上一步抽取的数据拷到板端：
+使用「板端部署与运行」中创建的客户端环境，并加载同一 SDK 的 `env.sh 4`：
 
 ```bash
-# 用系统 python3 建独立 venv（aarch64；有网即可）
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install numpy pillow pyarrow matplotlib opencv-python-headless
-# ffmpeg/ffprobe 需在 PATH（板端一般自带 /usr/bin/ffmpeg；否则 apt-get install -y ffmpeg）
-# 自检：
-python -c "import numpy,PIL,pyarrow,matplotlib; print('deps ok')"
-```
-
-```bash
-python3 openloop_infer_piper.py --model-dir <model_path>  --eval-data <eval_data_path> --model <pi0/pi05>
+cd /root/VLA
+export SDK=/root/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+source "$SDK/oellm_runtime_s600/env.sh" 4
+export LD_LIBRARY_PATH="$SDK/oellm_runtime_s600/examples/vla_demo/pi0/dist:${LD_LIBRARY_PATH:-}"
+./pi0_s600/case_client/.venv/bin/python pi0_s600/board/openloop_infer_piper.py \
+  --model pi0 --model-dir /root/VLA/pi0_models \
+  --model-config /root/VLA/pi0_s600/configs/runtime.json \
+  --sdk-root "$SDK/oellm_runtime_s600" \
+  --demo-dir "$SDK/oellm_runtime_s600/examples/vla_demo/pi0" \
+  --eval-data /root/VLA/eval_data --output-dir /root/VLA/pi0_s600/outputs/openloop --no-plots
 ```
 
 :::warning 注意
 
-- --model pi0：--model 默认 pi05。用 pi0 HBM + pi05 预设会报 \[layout\] suffix_pad=1 invalid ... suffix layout mismatch with HBM（version/suffix 不匹配）。
-- --model-dir 决定读哪个目录的 3 个 .hbm。norm_stats 默认取 --model-dir/norm_stats.json，必须含 state（缺则--norm-stats \<含 state 的文件>）。
-- 结果：跑完自动出 \*_trajectories.png / \*_frame_mae.png / \*_perdim_mae.png。
+- `--model pi0`：`--model` 默认 pi05。用 pi0 HBM 加 pi05 预设会报 `[layout] suffix_pad=1 invalid ... suffix layout mismatch with HBM`（version/suffix 不匹配）。
+- `--model-dir` 决定读哪个目录的 3 个 `.hbm`。`norm_stats` 默认取 `--model-dir/norm_stats.json`，必须含 state。
+- 命令带 `--no-plots`，输出预测记录和误差统计，不调用旧绘图脚本。
 
 :::
 
