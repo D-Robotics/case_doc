@@ -688,45 +688,45 @@ export LD_LIBRARY_PATH="$SDK/oellm_runtime_s600/examples/vla_demo/pi0/dist:${LD_
 
 ### 真机运行
 
-在板端启动 pi0 runtime。`--mode network` 时，runtime 作为 TCP client，主动连接客户端监听的 `30005` 端口：
+客户端目录为 `/root/VLA/pi0_s600/case_client`。连接、归位和运行统一使用 `../configs/client.yaml`。连接会自动使能双臂。现场确认急停、工作区和归位路径后再执行。
 
 ```bash
-# pi0 (RTC)
-cd D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/examples/vla_demo/pi0
-export LD_LIBRARY_PATH=<D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/lib>:$PWD/dist:${LD_LIBRARY_PATH:-}
-export HB_DNN_USER_DEFINED_L2M_SIZES=6:6:6:6
-./dist/vla_sdk_demo \
-  --oellm_config <pi0_config_json_path> \
-  --demo_config  <demo_json_path> \
-  --mode network
+cd /root/VLA/pi0_s600/case_client
+./run_arm.sh --list
+# 按现场映射启用两路 1 Mbps CAN，例如：
+# sudo ip link set can_left up type can bitrate 1000000
+# sudo ip link set can_right up type can bitrate 1000000
+./run_arm.sh --config ../configs/client.yaml
+./run_arm.sh --config ../configs/client.yaml --home
 ```
 
-客户端（`pi0_toolkit/deploy/vla_robot` 交付包：纯 Python、双臂 piper_sdk 直控 CAN，不依赖 ROS，控制包作为参考，可进一步优化；用法见下，详见 vla_robot/README.md）：
+归位并铺平毛巾后，先启动客户端监听，再启动 runtime。
 
 ```bash
-# vla_robot 见工具包
-cd vla_robot
-bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + 装依赖 + 写路径 (幂等)
-
-# —— 机械臂自检（默认只读；先 sudo ip link set can_left/right up type can bitrate 1000000）
-./run_arm.sh --list           # 列 CAN 接口 + RealSense 序列号，对应设备序列号填写在vla_robot/client/config/client.yaml中
-./run_arm.sh                  # 连接双臂, 读状态
-./run_arm.sh --home           # 归位到 sleep_position，sleep_position也在client.yaml中设置
-
-# —— VLA 客户端（先起 T2 runtime；客户端与 pi0/pi05 无关，模型由板端 runtime 配置决定）
-./run_client.sh                        # realsense 直连 + piper_sdk 双臂 (config/client.yaml)
-./run_client.sh --record-commands          # 记录 + 停止自动出图
-./run_client.sh --mock --duration 20   # 无硬件全链路自检 (合成相机 + 空跑臂 + mock runtime)
+# 板端终端 1
+cd /root/VLA/pi0_s600/case_client
+./run_client.sh --config ../configs/client.yaml \
+  --prompt "Fold the towel from bottom to top twice, then from right to left." \
+  --record-commands --duration 120 --log-level INFO
 ```
 
-- 配置：client/config/client.yaml（服务端端口、相机后端/顺序、14 维 arms.action_joint_names、obs.image_size、RTC、下发滤波、退出归位）、arm_control/config/arm.yaml（CAN 口、夹爪行程/力、sleep_position）。
-- 重点关注相机序号的配置以及机械臂 CAN 口名称与实际一致。
-- 板端约定一致：客户端进程监听 server.host:server.port（默认 0.0.0.0:30005），板端 runtime 主动连入。
-- 包内路径全为相对交付包根目录，可整体拷贝。piper_sdk 已 vendored 在 arm_control/third_party/，新机器只需 bash setup.sh。
+```bash
+# 板端终端 2
+export SDK=/root/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+cd "$SDK/oellm_runtime_s600/examples/vla_demo/pi0"
+source "$SDK/oellm_runtime_s600/env.sh" 4
+export LD_LIBRARY_PATH="$PWD/dist:${LD_LIBRARY_PATH:-}"
+./dist/vla_sdk_demo --oellm_config /root/VLA/pi0_s600/configs/runtime.json \
+  --demo_config /root/VLA/pi0_s600/configs/network.json --mode network
+```
+
+- 配置：`configs/client.yaml`（服务端端口、相机后端与顺序、14 维关节名、图像尺寸、RTC、下发滤波、退出归位），`case_client/arm_control/config/arm.yaml`（CAN 口、夹爪行程与力、`sleep_position`）。
+- 重点核对相机序列号，以及机械臂 CAN 口名称与现场一致。
+- 客户端进程监听 `server.host:server.port`（默认 `0.0.0.0:30005`），板端 runtime 主动连入。
 
 **网络通信协议**
 
-- 角色方向：板端 runtime（dist/vla_sdk_demo --mode network）是 TCP client，主动 connect() 到客户端机器。客户端侧（arm_interface 部署链的相机/臂节点所在机器，参考实现 deploy/src/inference_runner/inference_runner/oellm_tcp.py::OellmTcpClient）是 TCP server。地址/端口在 demo.json 的 network.\{server_ip,server_port,timeout\}（默认 127.0.0.1:30005）。
+- 角色方向：板端 runtime（dist/vla_sdk_demo --mode network）是 TCP client，主动 connect() 到客户端机器。客户端侧（arm_interface 部署链的相机/臂节点所在机器，参考实现 deploy/src/inference_runner/inference_runner/oellm_tcp.py::OellmTcpClient）是 TCP server。地址和端口在 `configs/network.json` 的 `network.server_ip`、`network.server_port`、`network.timeout`（默认 `127.0.0.1:30005`）。
 - 分帧：每帧 = \[4 字节大端序长度\]\[protobuf 字节流\]。板端 vla_demo_network.h 用 htonl/ntohl 读写长度头、SerializeToString/ParseFromString 收发。客户端用 struct.pack(">I", len) 对齐。请求与响应同为一种消息（MultiModalInput）。
 - 消息定义（oellm_runtime/examples/vla_demo/common/src/msg.proto）：
 
