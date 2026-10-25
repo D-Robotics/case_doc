@@ -546,7 +546,9 @@ bash case_client/setup.sh
 
 ### 运行时配置参考
 
-**pi0_config.json**
+配置示例使用包内 `configs/runtime.template.json`。运行时加载 `board/configure.py` 生成的 `configs/runtime.json`。模板已填写三个 HBM 文件名，生成脚本把模型目录绑定到 `/root/VLA/pi0_models`。
+
+**configs/runtime.template.json**
 
 ```jsonc
 {
@@ -554,11 +556,11 @@ bash case_client/setup.sh
   "model": {
     "version": "0",
     "denoise_num": 10,
-    "work_path": "/root/VLA/pi0",
+    "work_path": ".",
     "model_runner": {
-      "visual": "xxxx_vision_224x224_w8_nash-p_corenum_1.hbm",
-      "lm": "xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm",
-      "action": "xxxx_action_horizon_50_w8_nash-p_corenum_4.hbm"
+      "visual": "model_030000_vision_224x224_w8_nash-p_corenum_1.hbm",
+      "lm": "model_030000_language_w8_nash-p_corenum_4.hbm",
+      "action": "model_030000_action_ah_50_w8_nash-p_corenum_4.hbm"
     },
     "backends": {
       "visual": [1, 2, 3],
@@ -566,16 +568,8 @@ bash case_client/setup.sh
       "action": [1, 2, 3, 4]
     },
     "state_size": 14,
-    "euler_step": true,
+    "num_flow_steps": 10,
     "use_rtc": true
-  },
-  "rtc": {
-    "execution_horizon": 15,
-    "leftover_count": 10,
-    "inference_delay": 9,
-    "max_guidance_weight": 5.0,
-    "prefix_attention_schedule": "linear",
-    "control_frequency": 30.0
   },
   "interface": {
     "action_horizon": 50,
@@ -586,45 +580,55 @@ bash case_client/setup.sh
   "processing": {
     "preproc": true,
     "postproc": true,
-    "filter": {
-      "type": "none",
-      "fs": 15,
-      "mask": [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
-      "cutoff_hz": 1.0,
-      "max_velocity": []
-    },
+    "filter": {"type": "none", "fs": 0},
     "use_absolute_action": true,
     "use_quantiles_norm": false,
     "delta_action_mask": [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
     "inject_state": false
   },
   "dfx": {
-    "verbose": false,
     "dump": false,
     "dump_per_chunk": false,
     "dump_dir": "./output/",
     "stub_dir": "./stub/"
+  },
+  "warm_start": {"enabled": false},
+  "rtc": {
+    "execution_horizon": 15,
+    "leftover_count": 10,
+    "inference_delay": 9,
+    "max_guidance_weight": 5.0,
+    "prefix_attention_schedule": "linear",
+    "control_frequency": 30.0,
+    "use_model_prev": true
   }
 }
 ```
 
-**demo.json**
+**configs/network.json**
 
 ```jsonc
 {
-  "default_mode": "network",               // ← 使用网络推理方式
+  "default_mode": "network",
   "modes": ["local", "network"],
-  "io": {"input_dir": "input", "output_dir": "output", "multi_chunk": false},
+  "io": {
+    "input_dir": "./inputs",
+    "output_dir": "./outputs/openloop",
+    "multi_chunk": true,
+    "reset_filter_first": true
+  },
   "demo": {"infer_nums": 1, "image_count": 3, "language_count": 1, "state_count": 1},
-  "network": {"server_ip": "127.0.0.1", "server_port": 30005, "timeout": 120}  // ← 关注 ip 与端口号
+  "network": {"server_ip": "127.0.0.1", "server_port": 30005, "timeout": 120}
 }
 ```
 
 :::info 说明
 
-- state 归一化在 host 侧：state=(state-mean)/std（用 norm_stats.json 的 state），HBM 内只做 state_proj。
+- 保留三视角、`action_horizon=50`、有效 state/action 为 14 维、绝对动作、MEAN_STD，以及 `processing.inject_state=false`。
+- `model.num_flow_steps=10`，同时保留 `denoise_num=10`。滤波为 `processing.filter.type=none`、`fs=0`，`warm_start.enabled=false`。RTC 原参数保留，并设置 `rtc.use_model_prev=true`。
+- 客户端发送原始 state，runtime 按 checkpoint 统计量归一化，再补零到 32 维作为连续输入，不注入文本。
 - 输入图：可发 640×480 交给板端 resize（板端 ResizeWithPadToBuffer 非抗锯齿，与训练 torch 一致）。
-- 运行时端口：config/demo.json（server_port=30005）。
+- 运行时端口：`configs/network.json`（`server_port=30005`）。
 
 :::
 
@@ -796,7 +800,7 @@ bash setup.sh                 # 首次/迁移后执行一次: 建共用 venv + �
 | :--- | :--- | :--- |
 | 归一化 | MEAN_STD；state/action 14 维 | norm_stats_runtime.json（state+actions） |
 | 动作空间 | 绝对动作 | use_absolute_action=true |
-| state | 注入 prompt（inject_state） | inject_state=true + state_size=14 |
+| state | 连续输入，补零到 32 维 | inject_state=false + state_size=14 |
 | 图像 | 480×640 存储，模型内 resize 224 | 先 openpi resize_with_pad 到 224 |
 
 
