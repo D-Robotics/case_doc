@@ -20,21 +20,20 @@ Training
         │
         ▼
 Quantization + compilation (oe_llm_s600/pi0_conver/)
-   float_eval  → floating-point baseline / reference dump
-   calib       → fake-quant weights (pi0 has no time-mod LUT)
-   calib_eval  → fake-quant accuracy (calibration set)
-   compile     → 3× HBM (w8 nash-p)
+   floating-point reference → floating-point baseline / reference dump
+   calibration              → fake-quant weights (pi0 has no time-mod LUT)
+   fake-quant evaluation    → fake-quant accuracy (calibration set)
+   compilation              → 3× HBM (w8 nash-p)
 
         │
         ▼
 On-device deployment and running
    3× HBM + norm_stats_runtime.json + tokenizer/
-   server (vla_sdk_demo) + client (vla_robot)
+   server (vla_sdk_demo) + client (case_client)
 ```
 
 - Model: PaliGemma (gemma_2b) + Gemma action expert (gemma_300m), 3 cameras + 14-dim state/action (padded to 32), chunk=50, 10 denoising steps.
 - Quantization: int8 weights (w8) / action expert W8A16, compiled to nash-p HBM.
-- The pi0 model/pipeline code lives in pi0_pkg and hooks into the framework through runtime registration + monkey-patching.
 
 
 ## Results
@@ -101,7 +100,7 @@ Pi0 & Pi05 do not require a specific robotic arm or structure — the table belo
 ## Get the toolkit
 
 ```shell
-wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_toolkit.tar.gz
+wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_s600.tar.gz
 ```
 
 ## Training
@@ -293,44 +292,67 @@ lerobot has two dataset formats, v2.1 and v3.0. The training environment used he
 
 ## Quantization and compilation
 
+### Get the SDK
+
+Download and extract the latest official LLM SDK before quantization and compilation.
+
+```bash
+mkdir -p ~/VLA/oe_llm_s600/pi0_sdk
+cd ~/VLA/oe_llm_s600/pi0_sdk
+wget https://archive.d-robotics.cc/toolchain/llm/s100_s600_llm/llm_2.0.0/D-Robotics_LLM_2.0.0_S600_S100_SDK.tar.gz
+tar -xzf D-Robotics_LLM_2.0.0_S600_S100_SDK.tar.gz
+export SDK=$HOME/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+```
+
+:::info
+
+`~/VLA` is only an example working directory. Replace it with any path, as long as `export SDK` points at the actual SDK root.
+
+:::
+
 ### Environment setup
 
 ```bash
 conda create -n oellm python=3.10 -y
-pip install torch==2.8.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+conda activate oellm
+pip install torch==2.8.0+cu128 torchvision==0.23.0+cu128 torchaudio==2.8.0+cu128 --index-url https://download.pytorch.org/whl/cu128
 pip install $SDK/package/host/*.whl          # horizon / hbdk / hbm
 pip install -r $SDK/llm_compression/requirements.txt
+pip install numpy==1.26.4
 pip install --force-reinstall setuptools==80.10.2
 
 # Create the pi0_conver folder; put the files needed for quantization and the generated artifacts in it
 mkdir oe_llm_s600/pi0_conver
 ```
 
-Quantization package `pi0_toolkit/quantize/pi0_pkg/`
-
-| File | Purpose |
-| :--- | :--- |
-| model.py | Pi0Config + Pi0GemmaExpert (state_proj / action_time_mlp / standard RMSNorm) |
-| process_utils.py | Denoising loop with state + expert attention mask/position_ids (\_SUFFIX_STATE_TOKENS=1) |
-| pi0_model.py | Pi0 QModel (@MODEL_REGISTRY runtime registration; get_qconfig_setting("action") defines the quantization scheme) |
-| float_model.py | Pi0FloatModel + build_pi0_float_model |
-| patch.py | Monkey-patch vla_eval (pass state to the eval dump; state normalization + fp16 in HbmExecutor.\_run_expert; mask/pos for the suffix state token) |
-| run.py | Unified entry point: float_eval / calib / calib_eval / compile |
-
 ### Data and model preparation
 
-`pi0_toolkit/tool/prep_pi0.py` handles everything in one script: the model directory, the calibration data, `norm_stats_runtime.json`, and the configuration required for quantization.
+Use `pi0_s600/host/prep_pi0.py` to generate the model directory, calibration data, `norm_stats_runtime.json`, and the configuration required for quantization. Then use `prepare_sdk20.py` to generate the official SDK `samples.json` and `sdk20/` configuration.
 
 ```bash
-# Use the lerobot environment (lerobot 0.6.2, reads v3.0)
+cd ~/VLA
 conda activate lerobot
+python3 pi0_s600/host/prep_pi0.py \
+  --ckpt-dir lerobot/outputs/pi0_training/checkpoints/030000 \
+  --dataset-root /home/wunuo/VLA/TeleManipulation/data/lerobot_dataset/D-Robotics/fold_the_towel_remap_v3 \
+  --output-dir oe_llm_s600/pi0_conver \
+  --num-samples 30 \
+  --tokenizer lerobot/paligemma-3b-pt-224/tokenizer.model --copy-tokenizer
 
-python3 tool/prep_pi0.py \
-  --ckpt-dir     <model_path xxx/checkpoints/xxxx> \
-  --dataset-root <lerobot_v3data_path lerobot_dataset/xxx> \
-  --output-dir   oe_llm_s600/pi0_conver \
-  --num-samples  30
+conda activate oellm
+python3 pi0_s600/tools/apply_sdk_patches.py --sdk "$SDK" --scope host
+python3 pi0_s600/host/prepare_sdk20.py \
+  --assets oe_llm_s600/pi0_conver \
+  --checkpoint lerobot/outputs/pi0_training/checkpoints/030000
 ```
+
+:::info
+
+- `~/VLA` is only an example working directory and can be replaced with an existing one. Change the dataset path to the actual path.
+- Pi0 state is a continuous tensor: normalize it with the checkpoint MEAN_STD statistics, zero-pad it to 32 dimensions, and do not inject it into text.
+- The host position-id and attention patches are used together with the on-device position-id patch.
+
+:::
 
 <div className="markdown-table-scroll">
 <table>
@@ -344,7 +366,7 @@ python3 tool/prep_pi0.py \
     <tr>
       <td rowSpan={3}>Model directory</td>
       <td>`<output-dir>/model_<step>/config.json`</td>
-      <td>Pi05Config architecture constants: max_token_len=200, no uses_state</td>
+      <td>Pi0 configuration: max_token_len=48</td>
     </tr>
     <tr>
       <td>`<output-dir>/model_<step>/model.safetensors`</td>
@@ -356,15 +378,15 @@ python3 tool/prep_pi0.py \
     </tr>
     <tr>
       <td rowSpan={4}>Calibration data</td>
-      <td>`<output-dir>/pi05_calib_image/{sid}/image_{0,1,2}.jpg`</td>
+      <td>`<output-dir>/pi0_calib_image/{sid}/image_{0,1,2}.jpg`</td>
       <td>head / left / right (640×480, quality 95)</td>
     </tr>
     <tr>
-      <td>`<output-dir>/pi05_action_calib_data/{sid}/state.npy`<br />`action.npy`<br />`x_t.npy`</td>
+      <td>`<output-dir>/pi0_action_calib_data/{sid}/state.npy`<br />`action.npy`<br />`x_t.npy`</td>
       <td>\[14\] raw + \[50,32\] flow noise</td>
     </tr>
     <tr>
-      <td>`<output-dir>/pi05_prompt.json`</td>
+      <td>`<output-dir>/pi0_prompt.json`</td>
       <td>\[\{"text": ...\} x N\] (reads the dataset tasks by default)</td>
     </tr>
     <tr>
@@ -377,13 +399,17 @@ python3 tool/prep_pi0.py \
       <td>mean/std/q01/q99 of state + actions (used by the on-device runtime)</td>
     </tr>
     <tr>
-      <td rowSpan={2}>Quantization yml</td>
-      <td>`<output-dir>/pi0.yml`</td>
-      <td>For calib / calib_eval / compile</td>
+      <td rowSpan={3}>Official SDK inputs</td>
+      <td>`<output-dir>/sdk20/samples.json`</td>
+      <td>data_path for calibration and evaluation</td>
     </tr>
     <tr>
-      <td>`<output-dir>/pi0_float.yml`</td>
-      <td>For float_eval only: evaluation.calib_ckpt_load_path has been removed (otherwise torch_eval treats it as calib_eval)</td>
+      <td>`<output-dir>/sdk20/float.yml`</td>
+      <td>Floating-point reference. evaluation.calib_ckpt_load_path has been removed</td>
+    </tr>
+    <tr>
+      <td>`<output-dir>/sdk20/case.yml`</td>
+      <td>Calibration, fake-quant evaluation, and compilation. Later commands use these generated files</td>
     </tr>
   </tbody>
 </table>
@@ -397,33 +423,55 @@ python3 tool/prep_pi0.py \
 
 ### Quantize and compile
 
-Run the following in `pi0_conver/`.
-
 ```bash
-# Use the oellm environment
 conda activate oellm
+cd ~/VLA/oe_llm_s600/pi0_conver
+export PYTHONPATH="$SDK:$SDK/llm_compression/lightcompress:${PYTHONPATH:-}"
 
-cd oe_llm_s600/pi0_conver
-
-export PYTHONPATH="<D-Robotics_LLM_S600_2.0.0-Beta_SDK_path>:<D-Robotics_LLM_S600_2.0.0-Beta_SDK_path>/llm_compression/lightcompress:oe_llm_s600/pi0_conver"
-
-# Put run.py and pi0_pkg under oe_llm_s600/pi0_conver; see pi0_toolkit for the script and the pkg
-python run.py float_eval  --config_path pi0_float.yml  # 1) floating-point baseline + reference dump
-python run.py calib   --config_path pi0.yml     # 2) calibration (generates calib_ckpt/)
-python run.py calib_eval   --config_path pi0.yml # 3) fake-quant accuracy (calib_ckpt_load_path=./calib_ckpt in the yml)
-python run.py compile   --config_path pi0.yml   # 4) compile HBM (CPU only, lm takes about 2~3h)
+# 1. Floating-point reference
+python3 ~/VLA/pi0_s600/host/native_float_reference.py --config_path "$PWD/sdk20/float.yml"
+# 2. Calibration. Calls the official calib.py with gradient recording disabled
+python3 ~/VLA/pi0_s600/host/calib_no_grad.py --config_path "$PWD/sdk20/case.yml"
+# 3. Fake-quant evaluation
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 bash "$SDK/llm_compression/scripts/torch_eval.sh" --config_path "$PWD/sdk20/case.yml"
+# 4. Compile HBM
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 bash "$SDK/llm_compression/scripts/compile.sh" --config_path "$PWD/sdk20/case.yml"
 ```
 
-Key entries in `pi0.yml`:
+Key entries in `sdk20/case.yml`:
 
 ```yaml
-model:      {model_name: Pi0, model_path: .../model_060000, model_list: [visual,lm,action],
-             model_dtype: bfloat16, max_token_len: 48, enable_time_mod_lut: false}
-calibration:{dataset_type: vla_dataset, vla_image_path/vla_action_calib_data/vla_prompt_path: ...,
-             calibration_step: 30, calib_ckpt_save_path: ./calib_ckpt}
-evaluation: {norm_stats_path: .../norm_stats.json, eval_stages: [calib], dump_dir: ./eval_dump}
-compile:    {hbm_save_path: ./compile, calib_ckpt_load_path: ./calib_ckpt, opt_level: 2, enable_hpc: true, skip_embed_tokens: true, skip_lm_pd_split: true, lm:   {enable_hpc: false, core_num: 4},          # HPC disabled for lm ((256*3+48)%32 issue, see "Data / configuration")
-action:     {enable_hpc: true,  core_num: 4}}         # HPC enabled for action
+model:
+  type: Pi0
+  # path and norm_stats_path are filled in by the preparation script
+  model_list: [visual, lm, action]
+  model_dtype: bfloat16
+  q_config: performance
+  vision_token_num: 256
+  num_views: 3
+  action_horizon: 50
+  max_token_len: 48
+  discrete_state_input: false
+  valid_state_dim: null
+  enable_time_mod_lut: false
+calibration:
+  dataset_type: vla_dataset
+  calibration_step: 30
+  # data_path points at sdk20/samples.json
+evaluation:
+  dataset_type: vla_dataset
+  eval_step: 30
+  use_delta_joint_actions: false
+  use_quantiles_norm: false
+  vla_eval:
+    eval_stages: [calib]
+    valid_action_dim: 14
+    skip_dump_if_exists: false
+compile:
+  opt_level: 2
+  jobs: 32
+  lm: {enable_hpc: true, core_num: 4, max_l2m_size: 25165824}
+  action: {enable_hpc: false, core_num: 4, max_l2m_size: 25165824}
 ```
 
 Quantization scheme (pi0_model.py::get_qconfig_setting("action")):
@@ -446,23 +494,60 @@ Quantization scheme (pi0_model.py::get_qconfig_setting("action")):
 
 ## On-device deployment and running
 
-Copy the SDK to the board and focus on `D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/examples/vla_demo/pi0`. Before running, grant execute permission to `vla_sdk_demo` with: `chmod +x vla_sdk_demo`
+Copy the three compiled artifacts, the SDK, and the new source package to the board.
+
+- Extract the source package to `/root/VLA/pi0_s600` and the SDK to `/root/VLA/oe_llm_s600/pi0_sdk`.
+- Put the three HBM files in `/root/VLA/pi0_models`. Keep the file names produced under `sdk20/compile/`.
+- Also copy `norm_stats_runtime.json` (renamed to `norm_stats.json`) and the PaliGemma `tokenizer.json`, `tokenizer_config.json`, and `tokenizer.model` (renamed to `paligemma_tokenizer.model`). The statistics must include both state and actions.
 
 ### Required files at runtime
 
+Model files (`/root/VLA/pi0_models`):
+
 ```text
-pi0/
-├── xxxx_{vision,llm,action}_*.hbm             # Stage 2 artifacts, three models
-├── norm_stats.json                            # On-device runtime norm stats (includes state+actions, generated by prep_pi0)
-├── tokenizer.json / tokenizer_config.json     # Located under paligemma-3b-pt-224
-├── paligemma_tokenizer.model                  # tokenizer.model under paligemma-3b-pt-224, renamed
-├── pi0_config.json                            # oellm model configuration (under oellm_runtime/examples/vla_demo/pi0)
-└── demo.json                                  # demo configuration (network, 127.0.0.1:30005, under oellm_runtime/examples/vla_demo/pi0)
+/root/VLA/pi0_models/
+├── model_030000_vision_224x224_w8_nash-p_corenum_1.hbm
+├── model_030000_language_w8_nash-p_corenum_4.hbm
+├── model_030000_action_ah_50_w8_nash-p_corenum_4.hbm
+├── norm_stats.json                            # norm_stats_runtime.json, renamed; must include state + actions
+├── paligemma_tokenizer.model                  # tokenizer.model, renamed
+└── tokenizer.json / tokenizer_config.json
+```
+
+Case configuration (`/root/VLA/pi0_s600`):
+
+```text
+/root/VLA/pi0_s600/
+├── configs/runtime.json                       # model configuration generated by configure.py
+├── configs/network.json                       # network configuration (127.0.0.1:30005)
+└── configs/client.yaml                        # client and arm configuration
+```
+
+### Build the runtime
+
+Install the board build dependencies, apply the patch, build the full runtime, and generate the case configuration:
+
+```bash
+apt-get update
+apt-get install -y build-essential cmake pkg-config libopencv-dev libprotobuf-dev \
+  protobuf-compiler python3-venv ffmpeg patch
+
+export SDK=/root/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+python3 /root/VLA/pi0_s600/tools/apply_sdk_patches.py --sdk "$SDK" --scope board
+source "$SDK/oellm_runtime_s600/env.sh" 4
+cd "$SDK/oellm_runtime_s600/examples/vla_demo/pi0"
+BUILD_TARGET=full MODE=full bash build_demo.sh
+cd /root/VLA/pi0_s600
+bash case_client/setup.sh
+./case_client/.venv/bin/python -m pip install pillow pyarrow
+./case_client/.venv/bin/python board/configure.py --model-dir /root/VLA/pi0_models
 ```
 
 ### Runtime configuration reference
 
-**pi0_config.json**
+The example uses `configs/runtime.template.json` from the package. The runtime loads `configs/runtime.json` generated by `board/configure.py`. The template already names the three HBM files, and the generator binds the model directory to `/root/VLA/pi0_models`.
+
+**configs/runtime.template.json**
 
 ```jsonc
 {
@@ -470,11 +555,11 @@ pi0/
   "model": {
     "version": "0",
     "denoise_num": 10,
-    "work_path": "/root/VLA/pi0",
+    "work_path": ".",
     "model_runner": {
-      "visual": "xxxx_vision_224x224_w8_nash-p_corenum_1.hbm",
-      "lm": "xxxx_llm_action_horizon_50_w8_nash-p_corenum_4.hbm",
-      "action": "xxxx_action_horizon_50_w8_nash-p_corenum_4.hbm"
+      "visual": "model_030000_vision_224x224_w8_nash-p_corenum_1.hbm",
+      "lm": "model_030000_language_w8_nash-p_corenum_4.hbm",
+      "action": "model_030000_action_ah_50_w8_nash-p_corenum_4.hbm"
     },
     "backends": {
       "visual": [1, 2, 3],
@@ -482,16 +567,8 @@ pi0/
       "action": [1, 2, 3, 4]
     },
     "state_size": 14,
-    "euler_step": true,
+    "num_flow_steps": 10,
     "use_rtc": true
-  },
-  "rtc": {
-    "execution_horizon": 15,
-    "leftover_count": 10,
-    "inference_delay": 9,
-    "max_guidance_weight": 5.0,
-    "prefix_attention_schedule": "linear",
-    "control_frequency": 30.0
   },
   "interface": {
     "action_horizon": 50,
@@ -502,97 +579,107 @@ pi0/
   "processing": {
     "preproc": true,
     "postproc": true,
-    "filter": {
-      "type": "none",
-      "fs": 15,
-      "mask": [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
-      "cutoff_hz": 1.0,
-      "max_velocity": []
-    },
+    "filter": {"type": "none", "fs": 0},
     "use_absolute_action": true,
     "use_quantiles_norm": false,
     "delta_action_mask": [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0],
     "inject_state": false
   },
   "dfx": {
-    "verbose": false,
     "dump": false,
     "dump_per_chunk": false,
     "dump_dir": "./output/",
     "stub_dir": "./stub/"
+  },
+  "warm_start": {"enabled": false},
+  "rtc": {
+    "execution_horizon": 15,
+    "leftover_count": 10,
+    "inference_delay": 9,
+    "max_guidance_weight": 5.0,
+    "prefix_attention_schedule": "linear",
+    "control_frequency": 30.0,
+    "use_model_prev": true
   }
 }
 ```
 
-**demo.json**
+**configs/network.json**
 
 ```jsonc
 {
-  "default_mode": "network",               // ← use network inference
+  "default_mode": "network",
   "modes": ["local", "network"],
-  "io": {"input_dir": "input", "output_dir": "output", "multi_chunk": false},
+  "io": {
+    "input_dir": "./inputs",
+    "output_dir": "./outputs/openloop",
+    "multi_chunk": true,
+    "reset_filter_first": true
+  },
   "demo": {"infer_nums": 1, "image_count": 3, "language_count": 1, "state_count": 1},
-  "network": {"server_ip": "127.0.0.1", "server_port": 30005, "timeout": 120}  // ← set the IP and port
+  "network": {"server_ip": "127.0.0.1", "server_port": 30005, "timeout": 120}
 }
 ```
 
 :::info
 
-- State normalization happens on the host side: state=(state-mean)/std (using the state in norm_stats.json); inside the HBM only state_proj is performed.
+- Keep three views, `action_horizon=50`, a valid state/action size of 14, absolute actions, MEAN_STD, and `processing.inject_state=false`.
+- Set `model.num_flow_steps=10` and keep `denoise_num=10`. The filter is `processing.filter.type=none` with `fs=0`, and `warm_start.enabled=false`. Keep the original RTC parameters and set `rtc.use_model_prev=true`.
+- The client sends the raw state. The runtime normalizes it with the checkpoint statistics, zero-pads it to 32 dimensions as a continuous input, and does not inject it into text.
 - Input images: you can send 640×480 and let the board resize it (the board's ResizeWithPadToBuffer is not anti-aliased, matching the training torch path).
-- Runtime port: config/demo.json (server_port=30005).
+- Runtime port: `configs/network.json` (`server_port=30005`).
 
 :::
 
 ### Open-loop test
 
-Without hardware or teleoperation, feed GT observations (images + state) to the on-device HBM step by step and compare the predicted actions with the GT. On-device script: `pi0_toolkit/deploy/openloop_infer_piper.py` (plus `plot_openloop_npz.py` in the same directory, which generates the plots automatically when finished).
+Without hardware or teleoperation, feed GT observations (images + state) to the on-device HBM step by step and compare the predicted actions with the GT. The on-device script is `pi0_s600/board/openloop_infer_piper.py`.
 
 **Data extraction (training machine side)**
 
-Use `pi0_toolkit/tool/extract_episodes_v3.py` to extract the specified episodes from a v3.0 dataset:
+Use `pi0_s600/host/extract_episodes_v3.py` to extract the specified episodes from a v3.0 dataset. Point `--dataset-root` at the actual v3.0 data directory. `eval_data` is an example output directory:
 
 ```bash
 conda activate lerobot
 # Extract episodes 0/3/5, one sample every 30 frames in each episode (≈ the start of each chunk)
-python3 extract_episodes_v3.py --episodes 0 3 5 --stride 30 -o <out>
+python3 pi0_s600/host/extract_episodes_v3.py \
+  --dataset-root <v3.0 data directory> \
+  --episodes 0 3 5 --stride 30 -o eval_data
 # To sample 20 evenly spaced samples per episode: add --num-per-episode 20
 ```
 
-The output layout required by `openloop_infer_piper.py --eval-data`:
+Copy `eval_data` to `/root/VLA/eval_data` on the board. Output layout:
 
 ```text
-<out>/calib_image/<sid>/image_{0,1,2}.jpg        # head_cam, left_cam, right_cam
-<out>/action_calib_data/<sid>/state.npy          # [14] raw
-<out>/action_calib_data/<sid>/action.npy         # [14] GT (chunk step0, raw)
-<out>/action_calib_data/<sid>/x_t.npy            # [50,32] (not used on the board)
-<out>/prompt.json · norm_stats.json · manifest.json
+eval_data/calib_image/<sid>/image_{0,1,2}.jpg        # head_cam, left_cam, right_cam
+eval_data/action_calib_data/<sid>/state.npy          # [14] raw
+eval_data/action_calib_data/<sid>/action.npy         # [14] GT (chunk step0, raw)
+eval_data/action_calib_data/<sid>/x_t.npy            # [50,32] (not used on the board)
+eval_data/prompt.json · norm_stats.json · manifest.json
 ```
 
 **Open-loop test on the board**
 
-Copy the data extracted in the previous step to the board:
+Use the client environment created in [On-device deployment and running](#on-device-deployment-and-running), and load `env.sh 4` from the same SDK:
 
 ```bash
-# Create a separate venv with the system python3 (aarch64; network access is enough)
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install numpy pillow pyarrow matplotlib opencv-python-headless
-# ffmpeg/ffprobe must be on PATH (the board usually ships /usr/bin/ffmpeg; otherwise apt-get install -y ffmpeg)
-# Self-check:
-python -c "import numpy,PIL,pyarrow,matplotlib; print('deps ok')"
-```
-
-```bash
-python3 openloop_infer_piper.py --model-dir <model_path>  --eval-data <eval_data_path> --model <pi0/pi05>
+cd /root/VLA
+export SDK=/root/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+source "$SDK/oellm_runtime_s600/env.sh" 4
+export LD_LIBRARY_PATH="$SDK/oellm_runtime_s600/examples/vla_demo/pi0/dist:${LD_LIBRARY_PATH:-}"
+./pi0_s600/case_client/.venv/bin/python pi0_s600/board/openloop_infer_piper.py \
+  --model pi0 --model-dir /root/VLA/pi0_models \
+  --model-config /root/VLA/pi0_s600/configs/runtime.json \
+  --sdk-root "$SDK/oellm_runtime_s600" \
+  --demo-dir "$SDK/oellm_runtime_s600/examples/vla_demo/pi0" \
+  --eval-data /root/VLA/eval_data --output-dir /root/VLA/pi0_s600/outputs/openloop --no-plots
 ```
 
 :::warning
 
-- --model pi0: --model defaults to pi05; using pi0 HBM with the pi05 preset reports \[layout\] suffix_pad=1 invalid ... suffix layout mismatch with HBM (version/suffix mismatch).
-- --model-dir determines which directory's three .hbm files are read; norm_stats defaults to --model-dir/norm_stats.json and must contain state (if missing, use --norm-stats \<a file containing state\>).
-- Results: when finished, \*_trajectories.png / \*_frame_mae.png / \*_perdim_mae.png are generated automatically.
+- `--model pi0`: `--model` defaults to pi05. Using pi0 HBM with the pi05 preset reports `[layout] suffix_pad=1 invalid ... suffix layout mismatch with HBM` (version/suffix mismatch).
+- `--model-dir` determines which directory's three `.hbm` files are read. `norm_stats` defaults to `--model-dir/norm_stats.json` and must contain state.
+- The command includes `--no-plots`. It writes prediction records and error statistics, and does not call the old plotting script. Omit `--no-plots` to produce the prediction curves shown in the figure below.
 
 :::
 
@@ -600,45 +687,45 @@ python3 openloop_infer_piper.py --model-dir <model_path>  --eval-data <eval_data
 
 ### Run on the real robot
 
-Start the pi0 runtime on the board. With `--mode network`, the runtime acts as a TCP client and actively connects to port `30005`, which the client listens on:
+The client directory is `/root/VLA/pi0_s600/case_client`. Connection, homing, and running all use `../configs/client.yaml`. Connecting enables both arms automatically. Confirm the e-stop, the workspace, and the homing path on site before running.
 
 ```bash
-# pi0 (RTC)
-cd D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/examples/vla_demo/pi0
-export LD_LIBRARY_PATH=<D-Robotics_LLM_S600_2.0.0-Beta_SDK/oellm_runtime/lib>:$PWD/dist:${LD_LIBRARY_PATH:-}
-export HB_DNN_USER_DEFINED_L2M_SIZES=6:6:6:6
-./dist/vla_sdk_demo \
-  --oellm_config <pi0_config_json_path> \
-  --demo_config  <demo_json_path> \
-  --mode network
+cd /root/VLA/pi0_s600/case_client
+./run_arm.sh --list
+# Enable both 1 Mbps CAN buses according to the on-site mapping, for example:
+# sudo ip link set can_left up type can bitrate 1000000
+# sudo ip link set can_right up type can bitrate 1000000
+./run_arm.sh --config ../configs/client.yaml
+./run_arm.sh --config ../configs/client.yaml --home
 ```
 
-Client (the `pi0_toolkit/deploy/vla_robot` delivery package: pure Python, dual-arm control of CAN directly through piper_sdk, no ROS dependency; the control package is a reference and can be optimized further; for usage see below, and vla_robot/README.md for details):
+After homing and laying the towel flat, start the client listener first, then start the runtime.
 
 ```bash
-# vla_robot is in the toolkit
-cd vla_robot
-bash setup.sh                 # Run once on first use or after migrating: create the shared venv + install dependencies + write paths (idempotent)
-
-# —— Robotic arm self-check (read-only by default; first run sudo ip link set can_left/right up type can bitrate 1000000)
-./run_arm.sh --list           # List CAN interfaces + RealSense serial numbers; fill the corresponding device serial numbers into vla_robot/client/config/client.yaml
-./run_arm.sh                  # Connect both arms and read their state
-./run_arm.sh --home           # Return to sleep_position; sleep_position is also set in client.yaml
-
-# —— VLA client (start the T2 runtime first; the client is independent of pi0/pi05, the model is decided by the on-device runtime configuration)
-./run_client.sh                        # RealSense direct connection + piper_sdk dual arm (config/client.yaml)
-./run_client.sh --record-commands          # Record + generate plots automatically on stop
-./run_client.sh --mock --duration 20   # Full-chain self-check without hardware (synthetic camera + idle arm + mock runtime)
+# Board terminal 1
+cd /root/VLA/pi0_s600/case_client
+./run_client.sh --config ../configs/client.yaml \
+  --prompt "Fold the towel from bottom to top twice, then from right to left." \
+  --record-commands --duration 120 --log-level INFO
 ```
 
-- Configuration: client/config/client.yaml (server port, camera backend/order, the 14-dim arms.action_joint_names, obs.image_size, RTC, output filtering, return home on exit) and arm_control/config/arm.yaml (CAN ports, gripper stroke/force, sleep_position).
-- Pay close attention to the camera index configuration and to the arm CAN port names matching the actual hardware.
-- The board and the client must agree: the client process listens on server.host:server.port (default 0.0.0.0:30005), and the on-device runtime connects to it.
-- All paths inside the package are relative to the delivery package root, so the package can be copied as a whole; piper_sdk is already vendored under arm_control/third_party/, so a new machine only needs bash setup.sh.
+```bash
+# Board terminal 2
+export SDK=/root/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
+cd "$SDK/oellm_runtime_s600/examples/vla_demo/pi0"
+source "$SDK/oellm_runtime_s600/env.sh" 4
+export LD_LIBRARY_PATH="$PWD/dist:${LD_LIBRARY_PATH:-}"
+./dist/vla_sdk_demo --oellm_config /root/VLA/pi0_s600/configs/runtime.json \
+  --demo_config /root/VLA/pi0_s600/configs/network.json --mode network
+```
+
+- Configuration: `configs/client.yaml` (server port, camera backend and order, 14-dim joint names, image size, RTC, output filtering, and homing on exit) and `case_client/arm_control/config/arm.yaml` (CAN ports, gripper stroke and force, `sleep_position`).
+- Check that the camera serial numbers and the arm CAN port names match the hardware on site.
+- The client process listens on `server.host:server.port` (default `0.0.0.0:30005`), and the on-device runtime connects to it.
 
 **Network communication protocol**
 
-- Roles and direction: the on-device runtime (dist/vla_sdk_demo --mode network) is the TCP client and actively connect()s to the client machine; the client side (the machine hosting the camera/arm nodes of the arm_interface deployment chain; reference implementation: deploy/src/inference_runner/inference_runner/oellm_tcp.py::OellmTcpClient) is the TCP server. The address and port are in demo.json under network.\{server_ip,server_port,timeout\} (default 127.0.0.1:30005).
+- Roles and direction: the on-device runtime (dist/vla_sdk_demo --mode network) is the TCP client and actively connect()s to the client machine; the client side (the machine hosting the camera/arm nodes of the arm_interface deployment chain; reference implementation: deploy/src/inference_runner/inference_runner/oellm_tcp.py::OellmTcpClient) is the TCP server. The address and port are in `configs/network.json` under `network.server_ip`, `network.server_port`, and `network.timeout` (default `127.0.0.1:30005`).
 - Framing: each frame = \[4-byte big-endian length\]\[protobuf byte stream\]. On the board, vla_demo_network.h reads and writes the length header with htonl/ntohl and sends/receives with SerializeToString/ParseFromString; the client aligns with struct.pack(">I", len). Requests and responses use the same message type (MultiModalInput).
 - Message definition (oellm_runtime/examples/vla_demo/common/src/msg.proto):
 
@@ -702,7 +789,7 @@ bash setup.sh                 # Run once on first use or after migrating: create
 
 | Symptom | Root cause | Fix | Effect |
 | :--- | :--- | :--- | :--- |
-| Actions are completely wrong | euler_step defaults to false (velocity is fed back as x_t) | euler_step=true | 0.4955 → 0.4172 |
+| Actions are completely wrong | num_flow_steps is not 10 (velocity is fed back as x_t) | model.num_flow_steps=10 | 0.4955 → 0.4172 |
 | Actions are completely wrong | use_absolute_action defaults to false (state is added again) | use_absolute_action=true | Magnitude 1.99 → 1.00 |
 | norm_stats fails to initialize | norm_stats.json contains only actions and no state | Use norm_stats_runtime.json (which contains state) | — |
 
@@ -712,7 +799,7 @@ bash setup.sh                 # Run once on first use or after migrating: create
 | :--- | :--- | :--- |
 | Normalization | MEAN_STD; 14-dim state/action | norm_stats_runtime.json (state+actions) |
 | Action space | Absolute actions | use_absolute_action=true |
-| state | Injected into the prompt (inject_state) | inject_state=true + state_size=14 |
+| state | Continuous input, zero-padded to 32 dims | inject_state=false + state_size=14 |
 | Images | Stored at 480×640, resized to 224 inside the model | First resized to 224 with openpi resize_with_pad |
 
 

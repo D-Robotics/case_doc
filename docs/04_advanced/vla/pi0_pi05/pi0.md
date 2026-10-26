@@ -19,21 +19,20 @@ sidebar_position: 2
         │
         ▼
 量化 + 编译(oe_llm_s600/pi0_conver/)
-   float_eval  → 浮点基线 / 参考 dump
-   calib       → fake-quant 权重 (pi0 无 time-mod LUT)
-   calib_eval  → 伪量化精度 (校准集)
-   compile     → 3× HBM (w8 nash-p)
+   浮点参考   → 浮点基线 / 参考 dump
+   校准       → fake-quant 权重 (pi0 无 time-mod LUT)
+   伪量化评估 → 伪量化精度 (校准集)
+   编译       → 3× HBM (w8 nash-p)
 
         │
         ▼
 板端部署与运行
    3× HBM + norm_stats_runtime.json + tokenizer/
-   服务端 (vla_sdk_demo) + 客户端 (vla_robot)
+   服务端 (vla_sdk_demo) + 客户端 (case_client)
 ```
 
 - 模型：PaliGemma(gemma_2b) + Gemma 动作专家(gemma_300m)，3 路相机 + 14 维 state/action（pad 32），chunk=50，10 步去噪。
 - 量化：int8 权重（w8）/ 动作专家 W8A16，编译为 nash-p HBM。
-- pi0 模型/流程代码在 pi0_pkg，通过运行时注册 + monkey-patch 接入框架。
 
 
 ## 运行效果
@@ -310,25 +309,15 @@ export SDK=$HOME/VLA/oe_llm_s600/pi0_sdk/D-Robotics_LLM_2.0.0_S600_S100_SDK
 ```bash
 conda create -n oellm python=3.10 -y
 conda activate oellm
-pip install torch==2.8.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+pip install torch==2.8.0+cu128 torchvision==0.23.0+cu128 torchaudio==2.8.0+cu128 --index-url https://download.pytorch.org/whl/cu128
 pip install $SDK/package/host/*.whl          # horizon / hbdk / hbm
 pip install -r $SDK/llm_compression/requirements.txt
+pip install numpy==1.26.4
 pip install --force-reinstall setuptools==80.10.2
 
 # 创建 pi0_conver文件夹，量化所需文件以及生成产物都放在 pi0_conver
 mkdir oe_llm_s600/pi0_conver
 ```
-
-量化包 `pi0_toolkit/quantize/pi0_pkg/`
-
-| 文件 | 作用 |
-| :--- | :--- |
-| model.py | Pi0Config + Pi0GemmaExpert（state_proj / action_time_mlp / 标准 RMSNorm） |
-| process_utils.py | 带 state 的去噪循环 + 专家 attention mask/position_ids（_SUFFIX_STATE_TOKENS=1） |
-| pi0_model.py | Pi0 QModel（@MODEL_REGISTRY 运行时注册；get_qconfig_setting("action") 定义量化方案） |
-| float_model.py | Pi0FloatModel + build_pi0_float_model |
-| patch.py | monkey-patch vla_eval（eval dump 传 state、HbmExecutor.\_run_expert state 归一化+fp16、suffix state token 的 mask/pos） |
-| run.py | 统一入口：float_eval / calib / calib_eval / compile |
 
 ### 数据与模型准备
 
@@ -371,7 +360,7 @@ python3 pi0_s600/host/prepare_sdk20.py \
     <tr>
       <td rowSpan={3}>模型目录</td>
       <td>`<output-dir>/model_<step>/config.json`</td>
-      <td>Pi05Config 架构常量：max_token_len=200、无 uses_state</td>
+      <td>Pi0 配置：max_token_len=48</td>
     </tr>
     <tr>
       <td>`<output-dir>/model_<step>/model.safetensors`</td>
@@ -383,15 +372,15 @@ python3 pi0_s600/host/prepare_sdk20.py \
     </tr>
     <tr>
       <td rowSpan={4}>校准数据</td>
-      <td>`<output-dir>/pi05_calib_image/{sid}/image_{0,1,2}.jpg`</td>
+      <td>`<output-dir>/pi0_calib_image/{sid}/image_{0,1,2}.jpg`</td>
       <td>head / left / right（640×480，quality 95）</td>
     </tr>
     <tr>
-      <td>`<output-dir>/pi05_action_calib_data/{sid}/state.npy`<br />`action.npy`<br />`x_t.npy`</td>
+      <td>`<output-dir>/pi0_action_calib_data/{sid}/state.npy`<br />`action.npy`<br />`x_t.npy`</td>
       <td>\[14\] raw + \[50,32\] flow 噪声</td>
     </tr>
     <tr>
-      <td>`<output-dir>/pi05_prompt.json`</td>
+      <td>`<output-dir>/pi0_prompt.json`</td>
       <td>\[\{"text": ...\} x N\]（默认读数据集 tasks）</td>
     </tr>
     <tr>
@@ -404,13 +393,17 @@ python3 pi0_s600/host/prepare_sdk20.py \
       <td>state + actions 的 mean/std/q01/q99（板端运行时用）</td>
     </tr>
     <tr>
-      <td rowSpan={2}>量化 yml</td>
-      <td>`<output-dir>/pi0.yml`</td>
-      <td>calib / calib_eval / compile 用</td>
+      <td rowSpan={3}>官网 SDK 输入</td>
+      <td>`<output-dir>/sdk20/samples.json`</td>
+      <td>calibration 与 evaluation 的 data_path</td>
     </tr>
     <tr>
-      <td>`<output-dir>/pi0_float.yml`</td>
-      <td>float_eval 专用：已去 evaluation.calib_ckpt_load_path（否则 torch_eval 会当成 calib_eval）</td>
+      <td>`<output-dir>/sdk20/float.yml`</td>
+      <td>浮点参考。已去掉 evaluation.calib_ckpt_load_path</td>
+    </tr>
+    <tr>
+      <td>`<output-dir>/sdk20/case.yml`</td>
+      <td>校准、伪量化评估和编译。后续命令使用这些生成文件</td>
     </tr>
   </tbody>
 </table>
@@ -680,7 +673,7 @@ export LD_LIBRARY_PATH="$SDK/oellm_runtime_s600/examples/vla_demo/pi0/dist:${LD_
 
 - `--model pi0`：`--model` 默认 pi05。用 pi0 HBM 加 pi05 预设会报 `[layout] suffix_pad=1 invalid ... suffix layout mismatch with HBM`（version/suffix 不匹配）。
 - `--model-dir` 决定读哪个目录的 3 个 `.hbm`。`norm_stats` 默认取 `--model-dir/norm_stats.json`，必须含 state。
-- 命令带 `--no-plots`，输出预测记录和误差统计，不调用旧绘图脚本。
+- 命令带 `--no-plots`，输出预测记录和误差统计，不调用旧绘图脚本; 不带 `--no-plots` 才会出下图所示的预测曲线。
 
 :::
 
@@ -782,7 +775,7 @@ export LD_LIBRARY_PATH="$PWD/dist:${LD_LIBRARY_PATH:-}"
 | 现象 | 根因 | 解决 |
 | :--- | :--- | :--- |
 | 加载卡死 / 访问 huggingface 超时 | 离线环境仍尝试联网 | HF_HUB_OFFLINE=1；base 权重走 hf-mirror 镜像本地化 |
-| tokenizer 加载失败（gated） | google/paligemma-3b-pt-224 需授权 | 本地下载并改 pi05_base/policy_preprocessor.json 路径；训练后 ckpt 自带 tokenizer/ |
+| tokenizer 加载失败（gated） | google/paligemma-3b-pt-224 需授权 | 本地下载并改 pi0_base/policy_preprocessor.json 路径；训练后 ckpt 自带 tokenizer/ |
 | v2.1 数据集读不了 | lerobot ≥0.4 抛 BackwardCompatibilityError | 训练/校准用 v3.0；v2.1 用 drrm(0.3.3) 或先转 v3.0（格式差异见 [数据集格式说明](#数据集格式说明)） |
 | 数据集 key 是扁平名 | 训练特征名与策略不符 | --rename_map 映射 head_cam→observation.images.head_cam 等 |
 
@@ -790,7 +783,7 @@ export LD_LIBRARY_PATH="$PWD/dist:${LD_LIBRARY_PATH:-}"
 
 | 现象 | 根因 | 解决 | 效果 |
 | :--- | :--- | :--- | :--- |
-| 动作完全不对 | euler_step 缺省 false（velocity 当 x_t 回灌） | euler_step=true | 0.4955 → 0.4172 |
+| 动作完全不对 | num_flow_steps 未设为 10（velocity 当 x_t 回灌） | model.num_flow_steps=10 | 0.4955 → 0.4172 |
 | 动作完全不对 | use_absolute_action 缺省 false（又叠一次 state） | use_absolute_action=true | 量级 1.99 → 1.00 |
 | norm_stats 初始化失败 | norm_stats.json 只有 actions 缺 state | 用 norm_stats_runtime.json（含 state） | — |
 
