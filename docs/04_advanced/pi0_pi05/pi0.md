@@ -675,7 +675,7 @@ export LD_LIBRARY_PATH="$SDK/oellm_runtime_s600/examples/vla_demo/pi0/dist:${LD_
 - `--model pi0`：`--model` 默认 pi05。用 pi0 HBM 加 pi05 预设会报 `[layout] suffix_pad=1 invalid ... suffix layout mismatch with HBM`（version/suffix 不匹配）。
 - `--model-dir` 决定读哪个目录的 3 个 `.hbm`。`norm_stats` 默认取 `--model-dir/norm_stats.json`，必须含 state。
 - 按 `stride=30` 抽取的 GT 观测彼此不连续。默认 RTC 会沿用上一段预测缓存，开环误差会被放大。上面的 `--model-config-patch` 只在这次独立样本开环里关闭 RTC，真机仍使用 `configs/runtime.json` 里的 RTC 配置。
-- 开环耗时是 runtime 内部计时。脚本汇总全部样本的 profile，输出平均耗时与 P95，不是首条样本的 `profile_ms`。同一组 133 条观测上，Total 均值为 128.61 ms。
+- 开环耗时是 runtime 内部计时，脚本汇总全部样本的 profile，输出平均耗时与 P95。
 - 命令带 `--no-plots`，输出预测记录和误差统计，不调用旧绘图脚本; 不带 `--no-plots` 才会出下图所示的预测曲线。
 
 :::
@@ -716,7 +716,7 @@ export LD_LIBRARY_PATH="$PWD/dist:${LD_LIBRARY_PATH:-}"
   --demo_config /root/VLA/pi0_s600/configs/network.json --mode network
 ```
 
-- 配置：`configs/client.yaml`（服务端端口、相机后端与顺序、14 维关节名、图像尺寸、RTC、下发滤波、退出归位，以及 `arms` 节中的 CAN 口、夹爪行程与力、`sleep_position`）。本流程读取的是该文件。
+- 配置：`configs/client.yaml`（服务端端口、相机后端与顺序、14 维关节名、图像尺寸、RTC、下发滤波、退出归位，以及 `arms` 节中的 CAN 口、夹爪行程与力、`sleep_position`）。
 - 重点核对相机序列号，以及机械臂 CAN 口名称与现场一致。
 - 客户端进程监听 `server.host:server.port`（默认 `0.0.0.0:30005`），板端 runtime 主动连入。
 
@@ -818,27 +818,25 @@ export LD_LIBRARY_PATH="$PWD/dist:${LD_LIBRARY_PATH:-}"
 | calib_eval | tensor MAE | 0.002611 |
 | calib_eval | tensor cosine | 0.999775 |
 
-以上为 runtime 内计时：preproc 0.1ms + visual ~20ms + lm ~100ms + action ~125ms + postproc 0.1ms ≈ 250-270ms。此处为高精度版本，若欲提升推理性能，可参考 OELLM 工具链中的均衡版本以及高性能版本
+
+:::info 说明
+
+以上为 runtime 内计时：preproc 0.1ms + visual ~20ms + lm ~100ms + action ~125ms + postproc 0.1ms ≈ 250-270ms。此处为高精度版本，若欲提升推理性能，可参考 OELLM 工具链中的均衡版本以及高性能版本。
+
+:::
 
 ### 实机资源占用
 
-实机推理时各阶段的 CPU 占用率如下。Pi0 与 Pi05 放在同一张表里，便于对照。
+折毛巾实机运行时，RDK S600 的 CPU 与四核 BPU 占用如下。
 
-| 阶段 | Pi0 CPU 占用率 | Pi05 CPU 占用率 |
-| :--- | :--- | :--- |
-| 状态与文本预处理 | 5.40% | 5.45% |
-| 图像预处理 / 输入准备 | 5.52% | 6.26% |
-| 视觉编码：调度与等待 | 0.41% | 0.40% |
-| 语言模型输入准备 | 5.51% | 5.52% |
-| 语言模型：调度与等待 | 0.21% | 0.21% |
-| 动作去噪： CPU + BPU | 1.14% | 0.99% |
-| 动作反归一化 / 滤波 | 5.21% | 5.32% |
+#### CPU 占用
 
-Pi0 四核 BPU 使用率如下。每核独立按 100% 计，数值是时间窗口内的利用率。
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-real-cpu.jpg" alt="Pi0 实机运行的 CPU 占用时序" width="80%" style={{ display: 'block', margin: '0 auto' }} />
 
-| 核心 | 平均 | P95 | 峰值 |
-| :--- | :--- | :--- | :--- |
-| BPU 0 | 11.19% | 23.0% | 29.0% |
-| BPU 1 | 11.19% | 23.0% | 29.0% |
-| BPU 2 | 11.17% | 23.0% | 29.0% |
-| BPU 3 | 8.90% | 20.0% | 24.0% |
+#### 四核 BPU 使用率
+
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-real-bpu.jpg" alt="Pi0 实机运行的四核 BPU 使用率" width="80%" style={{ display: 'block', margin: '0 auto' }} />
+
+#### 分阶段 CPU 占用
+
+<img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/pi0-pi05-stage-cpu.png" alt="Pi0 与 Pi05 分阶段 CPU 占用率" width="70%" style={{ display: 'block', margin: '0 auto' }} />
