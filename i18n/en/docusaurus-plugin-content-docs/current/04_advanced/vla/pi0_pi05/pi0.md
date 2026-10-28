@@ -672,13 +672,15 @@ export LD_LIBRARY_PATH="$SDK/oellm_runtime_s600/examples/vla_demo/pi0/dist:${LD_
   --model-config /root/VLA/pi0_s600/configs/runtime.json \
   --sdk-root "$SDK/oellm_runtime_s600" \
   --demo-dir "$SDK/oellm_runtime_s600/examples/vla_demo/pi0" \
-  --eval-data /root/VLA/eval_data --output-dir /root/VLA/pi0_s600/outputs/openloop --no-plots
+  --eval-data /root/VLA/eval_data --output-dir /root/VLA/pi0_s600/outputs/openloop --no-plots \
+  --model-config-patch '{"model":{"use_rtc":false}}'
 ```
 
 :::warning
 
 - `--model pi0`: `--model` defaults to pi05. Using pi0 HBM with the pi05 preset reports `[layout] suffix_pad=1 invalid ... suffix layout mismatch with HBM` (version/suffix mismatch).
 - `--model-dir` determines which directory's three `.hbm` files are read. `norm_stats` defaults to `--model-dir/norm_stats.json` and must contain state.
+- GT observations extracted with `stride=30` are not continuous. The default RTC reuses the previous prediction cache and inflates the open-loop error. The `--model-config-patch` above disables RTC only for this independent-sample open-loop run. Real-robot runs still use the RTC settings in `configs/runtime.json`.
 - The command includes `--no-plots`. It writes prediction records and error statistics, and does not call the old plotting script. Omit `--no-plots` to produce the prediction curves shown in the figure below.
 
 :::

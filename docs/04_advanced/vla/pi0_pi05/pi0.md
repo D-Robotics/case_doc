@@ -666,13 +666,15 @@ export LD_LIBRARY_PATH="$SDK/oellm_runtime_s600/examples/vla_demo/pi0/dist:${LD_
   --model-config /root/VLA/pi0_s600/configs/runtime.json \
   --sdk-root "$SDK/oellm_runtime_s600" \
   --demo-dir "$SDK/oellm_runtime_s600/examples/vla_demo/pi0" \
-  --eval-data /root/VLA/eval_data --output-dir /root/VLA/pi0_s600/outputs/openloop --no-plots
+  --eval-data /root/VLA/eval_data --output-dir /root/VLA/pi0_s600/outputs/openloop --no-plots \
+  --model-config-patch '{"model":{"use_rtc":false}}'
 ```
 
 :::warning 注意
 
 - `--model pi0`：`--model` 默认 pi05。用 pi0 HBM 加 pi05 预设会报 `[layout] suffix_pad=1 invalid ... suffix layout mismatch with HBM`（version/suffix 不匹配）。
 - `--model-dir` 决定读哪个目录的 3 个 `.hbm`。`norm_stats` 默认取 `--model-dir/norm_stats.json`，必须含 state。
+- 按 `stride=30` 抽取的 GT 观测彼此不连续。默认 RTC 会沿用上一段预测缓存，开环误差会被放大。上面的 `--model-config-patch` 只在这次独立样本开环里关闭 RTC，真机仍使用 `configs/runtime.json` 里的 RTC 配置。
 - 命令带 `--no-plots`，输出预测记录和误差统计，不调用旧绘图脚本; 不带 `--no-plots` 才会出下图所示的预测曲线。
 
 :::
