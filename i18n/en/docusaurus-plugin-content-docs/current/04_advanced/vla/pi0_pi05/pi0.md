@@ -721,7 +721,7 @@ export LD_LIBRARY_PATH="$PWD/dist:${LD_LIBRARY_PATH:-}"
   --demo_config /root/VLA/pi0_s600/configs/network.json --mode network
 ```
 
-- Configuration: `configs/client.yaml` (server port, camera backend and order, 14-dim joint names, image size, RTC, output filtering, and homing on exit) and `case_client/arm_control/config/arm.yaml` (CAN ports, gripper stroke and force, `sleep_position`).
+- Configuration: `configs/client.yaml` (server port, camera backend and order, 14-dim joint names, image size, RTC, output filtering, homing on exit, and the CAN ports, gripper stroke and force, and `sleep_position` under `arms`). This flow reads that file.
 - Check that the camera serial numbers and the arm CAN port names match the hardware on site.
 - The client process listens on `server.host:server.port` (default `0.0.0.0:30005`), and the on-device runtime connects to it.
 
