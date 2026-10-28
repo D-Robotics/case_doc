@@ -825,3 +825,26 @@ For reference only for this task; calibration set of 30 samples, fake-quant vs f
 | calib_eval | tensor cosine | 0.999775 |
 
 The timings above are measured inside the runtime: preproc 0.1ms + visual ~20ms + lm ~100ms + action ~125ms + postproc 0.1ms ≈ 250-270ms. This is the high-accuracy version; to improve inference performance, refer to the balanced and high-performance versions in the OELLM toolchain.
+
+### Resource usage on the real robot
+
+CPU usage by stage during real-robot inference. Pi0 and Pi05 are listed together for comparison.
+
+| Stage | Pi0 CPU usage | Pi05 CPU usage |
+| :--- | :--- | :--- |
+| State and text preprocessing | 5.40% | 5.45% |
+| Image preprocessing / input preparation | 5.52% | 6.26% |
+| Vision encoding: schedule and wait | 0.41% | 0.40% |
+| Language model input preparation | 5.51% | 5.52% |
+| Language model: schedule and wait | 0.21% | 0.21% |
+| Action denoising: CPU + BPU | 1.14% | 0.99% |
+| Action denormalization / filtering | 5.21% | 5.32% |
+
+Pi0 BPU usage on four cores. Each core is scaled independently to 100%, and the values are utilization over the sampling window.
+
+| Core | Mean | P95 | Peak |
+| :--- | :--- | :--- | :--- |
+| BPU 0 | 11.19% | 23.0% | 29.0% |
+| BPU 1 | 11.19% | 23.0% | 29.0% |
+| BPU 2 | 11.17% | 23.0% | 29.0% |
+| BPU 3 | 8.90% | 20.0% | 24.0% |
