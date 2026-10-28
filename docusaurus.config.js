@@ -19,7 +19,7 @@ const resolvedBaseUrl =
 const resolvedSiteUrl = process.env.DOCS_SITE_URL?.trim() || "http://localhost:3000";
 const buildProduct = process.env.DOC_BUILD_PRODUCT?.trim() || "";
 const buildVersion = process.env.DOC_BUILD_VERSION?.trim() || "";
-const COPYRIGHT_START_YEAR = 2024;
+const COPYRIGHT_START_YEAR = 2026;
 const currentYear = new Date().getFullYear();
 const copyrightYearLabel =
   currentYear > COPYRIGHT_START_YEAR
@@ -28,7 +28,10 @@ const copyrightYearLabel =
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "RDK S600 Cases DOC",
+  title:
+    process.env.DOCUSAURUS_CURRENT_LOCALE === "en"
+      ? "RDK S600 Cases User Manual"
+      : "RDK S600 案例用户手册",
   // tagline: 'Dinosaurs are cool',
   favicon: "img/logo.png",
   // trailingSlash: false,
@@ -205,7 +208,7 @@ const config = {
       navbar: {
         title: "D-Robotics",
         logo: {
-          alt: "地瓜机器人 logo",
+          alt: "地瓜 logo",
           src: "img/logo.png",
           // href: "https://d-robotics.cc/", // 修改为文档根路径
         },
@@ -279,9 +282,9 @@ const config = {
         darkTheme: prismThemes.dracula,
       },
       algolia: {
-        appId: "1VU781LYTV",
-        apiKey: "fb65c6e54a52ce6fba0645bd2630e79b",
-        indexName: "case_doc",
+        appId: process.env.ALGOLIA_APP_ID || "1VU781LYTV",
+        apiKey: process.env.ALGOLIA_SEARCH_API_KEY || "fb65c6e54a52ce6fba0645bd2630e79b",
+        indexName: process.env.ALGOLIA_INDEX_NAME || "case_doc",
         contextualSearch: true,
         searchPagePath: "search",
       },
