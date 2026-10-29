@@ -110,23 +110,24 @@ Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
 | :--- | :--- | :--- |
 | Training | lerobot | <ul><li>RTX 5090</li><li>CUDA 13.3</li><li>Python 3.12</li><li>torch 2.11</li><li>lerobot 0.6.2 (editable)</li></ul> |
 
-- After the base environment is set up, clone the lerobot code and install the dependencies.
+- After the base environment is set up, activate the `lerobot` training environment, enter the repository, and install the dependencies.
 
   ```bash
-  # Clone the lerobot code
+  conda activate lerobot
   git clone https://github.com/huggingface/lerobot.git
+  cd lerobot
 
   pip install -e ".[core_scripts]"  # For robot workflows (recording, replaying, calibrate)
   pip install -e ".[training]"      # For training policies
   pip install -e ".[all]"     # Everything (all policies, envs, hardware, dev tools)
   ```
 
-- Dataset format: training uses v3.0 (`CODEBASE_VERSION=v3.0`); v2.1 must first be converted to v3.0 (`convert_dataset_v21_to_v30.py`). For the v2.1/v3.0 directory structure comparison, see [Dataset format](#dataset-format). The local data conversion command is:
+- Dataset format: training uses v3.0 (`CODEBASE_VERSION=v3.0`); v2.1 must first be converted to v3.0 (`convert_dataset_v21_to_v30.py`). For the v2.1/v3.0 directory structure comparison, see [Dataset format](#dataset-format). Run the local conversion from the directory where you cloned `lerobot` (the parent of `lerobot`), and replace `--root` with your data path:
 
   ```bash
   python lerobot/src/lerobot/scripts/convert_dataset_v21_to_v30.py  \
       --repo-id=xxx \
-      --root=<path to the data to convert>  \
+      --root=xxx \
       --push-to-hub=false
   ```
     :::warning
@@ -155,6 +156,8 @@ Code: https://github.com/huggingface/lerobot (lerobot 0.6.2 d451fe4).
 
 ### Training command
 
+The example data is not publicly available. Collect your own data for the robot and the task. Replace `xxx` in `--dataset.repo_id` and `--dataset.root` with your dataset id and path.
+
 ```bash
 # Start the lerobot environment
 cd lerobot
@@ -162,8 +165,8 @@ conda activate lerobot
 
 # Fine-tune from pi0_base (use rename_map if the dataset needs remapping)
 HF_HUB_OFFLINE=1 lerobot-train \
-    --dataset.repo_id=D-Robotics/fold_the_towel_remap_v3 \
-    --dataset.root=<...>/fold_the_towel_remap_v3 \
+    --dataset.repo_id=xxx \
+    --dataset.root=xxx \
     --policy.type=pi0 \
     --output_dir=./outputs/pi0_training \
     --job_name=pi0_training \
@@ -223,10 +226,10 @@ HF_HUB_OFFLINE=1 lerobot-train \
 
 :::info
 
-lerobot has two dataset formats, v2.1 and v3.0. The training environment used here, lerobot (0.6.2, CODEBASE_VERSION=v3.0), can read only v3.0.
+lerobot has two dataset formats, v2.1 and v3.0. The training environment used here, lerobot (0.6.2, CODEBASE_VERSION=v3.0), can read only v3.0. The example data is not publicly available. Collect your own data for the robot and the task.
 :::
 
-**v2.1 — fold_the_towel**
+**v2.1 — xxx**
 
 ```text
 .
@@ -247,7 +250,7 @@ lerobot has two dataset formats, v2.1 and v3.0. The training environment used he
         └── right_cam/episode_000000.mp4
 ```
 
-**v3.0 — fold_the_towel_v3**
+**v3.0 — xxx**
 
 ```text
 .
@@ -331,7 +334,7 @@ cd ~/VLA
 conda activate lerobot
 python3 pi0_s600/host/prep_pi0.py \
   --ckpt-dir lerobot/outputs/pi0_training/checkpoints/030000 \
-  --dataset-root /home/wunuo/VLA/TeleManipulation/data/lerobot_dataset/D-Robotics/fold_the_towel_remap_v3 \
+  --dataset-root xxx \
   --output-dir oe_llm_s600/pi0_conver \
   --num-samples 30 \
   --tokenizer lerobot/paligemma-3b-pt-224/tokenizer.model --copy-tokenizer
@@ -634,13 +637,13 @@ Without hardware or teleoperation, feed GT observations (images + state) to the 
 
 **Data extraction (training machine side)**
 
-Use `pi0_s600/host/extract_episodes_v3.py` to extract the specified episodes from a v3.0 dataset. Point `--dataset-root` at the actual v3.0 data directory. `eval_data` is an example output directory:
+Use `pi0_s600/host/extract_episodes_v3.py` to extract the specified episodes from a v3.0 dataset. Replace `xxx` in `--dataset-root` with the v3.0 data directory. `eval_data` is an example output directory:
 
 ```bash
 conda activate lerobot
 # Extract episodes 0/3/5, one sample every 30 frames in each episode (≈ the start of each chunk)
 python3 pi0_s600/host/extract_episodes_v3.py \
-  --dataset-root <v3.0 data directory> \
+  --dataset-root xxx \
   --episodes 0 3 5 --stride 30 -o eval_data
 # To sample 20 evenly spaced samples per episode: add --num-per-episode 20
 ```

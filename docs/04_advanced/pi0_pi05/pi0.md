@@ -107,23 +107,24 @@ wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_s600.tar
 | :--- | :--- | :--- |
 | 训练 | lerobot | <ul><li>RTX 5090</li><li>CUDA 13.3</li><li>Python 3.12</li><li>torch 2.11</li><li>lerobot 0.6.2（editable）</li></ul> |
 
-- 基础环境搭建完成之后，下拉 lerobot 代码，安装依赖：
+- 基础环境搭建完成之后，先激活训练环境 `lerobot`，再进入仓库安装依赖：
 
   ```bash
-  #下拉 lerobot 代码
+  conda activate lerobot
   git clone https://github.com/huggingface/lerobot.git
+  cd lerobot
 
   pip install -e ".[core_scripts]"  # For robot workflows (recording, replaying, calibrate)
   pip install -e ".[training]"      # For training policies
   pip install -e ".[all]"     # Everything (all policies, envs, hardware, dev tools)
   ```
 
-- 数据集格式：训练用 v3.0（`CODEBASE_VERSION=v3.0`），v2.1 需先转 v3.0（`convert_dataset_v21_to_v30.py`）。v2.1/v3.0 的目录结构对照见 [数据集格式说明](#数据集格式说明)。本地数据转换指令如下：
+- 数据集格式：训练用 v3.0（`CODEBASE_VERSION=v3.0`），v2.1 需先转 v3.0（`convert_dataset_v21_to_v30.py`）。v2.1/v3.0 的目录结构对照见 [数据集格式说明](#数据集格式说明)。本地数据转换在 clone 所在目录（`lerobot` 的上一级）执行，`--root` 换成自己的数据路径：
 
   ```bash
   python lerobot/src/lerobot/scripts/convert_dataset_v21_to_v30.py  \
       --repo-id=xxx \
-      --root=待转换数据路径  \
+      --root=xxx \
       --push-to-hub=false
   ```
     :::warning 注意
@@ -152,6 +153,8 @@ wget https://archive.d-robotics.cc/downloads/rdk_demo/rdk_s600_demo/pi0_s600.tar
 
 ### 训练命令
 
+示例数据不对外开放，开发者根据实机环境和应用场景自行采集。`--dataset.repo_id` 与 `--dataset.root` 中的 `xxx` 换成自己的数据集标识和路径。
+
 ```bash
 #启动lerobot环境
 cd lerobot
@@ -159,8 +162,8 @@ conda activate lerobot
 
 #从 pi0_base 微调（数据集若需要重映射则使用rename_map）
 HF_HUB_OFFLINE=1 lerobot-train \
-    --dataset.repo_id=D-Robotics/fold_the_towel_remap_v3 \
-    --dataset.root=<...>/fold_the_towel_remap_v3 \
+    --dataset.repo_id=xxx \
+    --dataset.root=xxx \
     --policy.type=pi0 \
     --output_dir=./outputs/pi0_training \
     --job_name=pi0_training \
@@ -220,10 +223,10 @@ HF_HUB_OFFLINE=1 lerobot-train \
 
 :::info 说明
 
-lerobot 存在 v2.1 与 v3.0 两种数据集格式。本次使用的训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。
+lerobot 存在 v2.1 与 v3.0 两种数据集格式。本次使用的训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。示例数据不对外开放，开发者根据实机环境和应用场景自行采集。
 :::
 
-**v2.1 — fold_the_towel**
+**v2.1 — xxx**
 
 ```text
 .
@@ -244,7 +247,7 @@ lerobot 存在 v2.1 与 v3.0 两种数据集格式。本次使用的训练环境
         └── right_cam/episode_000000.mp4
 ```
 
-**v3.0 — fold_the_towel_v3**
+**v3.0 — xxx**
 
 ```text
 .
@@ -328,7 +331,7 @@ cd ~/VLA
 conda activate lerobot
 python3 pi0_s600/host/prep_pi0.py \
   --ckpt-dir lerobot/outputs/pi0_training/checkpoints/030000 \
-  --dataset-root /home/wunuo/VLA/TeleManipulation/data/lerobot_dataset/D-Robotics/fold_the_towel_remap_v3 \
+  --dataset-root xxx \
   --output-dir oe_llm_s600/pi0_conver \
   --num-samples 30 \
   --tokenizer lerobot/paligemma-3b-pt-224/tokenizer.model --copy-tokenizer
@@ -631,13 +634,13 @@ bash case_client/setup.sh
 
 **数据获取（训练机侧）**
 
-用 `pi0_s600/host/extract_episodes_v3.py` 从 v3.0 数据集抽取指定 episode。`--dataset-root` 指向实际 v3.0 数据目录，输出目录以 `eval_data` 为例：
+用 `pi0_s600/host/extract_episodes_v3.py` 从 v3.0 数据集抽取指定 episode。`--dataset-root` 的 `xxx` 换成实际 v3.0 数据目录，输出目录以 `eval_data` 为例：
 
 ```bash
 conda activate lerobot
 # 抽 episode 0/3/5，每个 episode 每 30 帧一条（≈ 每个 chunk 起点）
 python3 pi0_s600/host/extract_episodes_v3.py \
-  --dataset-root <v3.0 数据目录> \
+  --dataset-root xxx \
   --episodes 0 3 5 --stride 30 -o eval_data
 # 每个 episode 均匀抽 20 条：加 --num-per-episode 20
 ```
