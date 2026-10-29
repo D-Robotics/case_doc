@@ -1,11 +1,11 @@
 ---
-title: "Vision-Language-Action Model (VLA)"
+title: "Pi0 Hammer the Block (Simulation)"
 description: "Deploy the Pi0 vision-language-action model on the RDK S600 and in PC simulation for end-to-end robot control."
 sidebar_position: 1
-sidebar_label: 1. Vision-Language-Action Model (VLA)
+sidebar_label: 1. Pi0 Hammer the Block (Simulation)
 ---
 
-# Vision-Language-Action Model (VLA)
+# Pi0 Hammer the Block (Simulation)
 
 VLA (Vision-Language-Action Model) is an end-to-end model that combines visual understanding, language interaction, and robot control. It generates robot actions directly from visual input and language instructions, and is widely used in embodied intelligence and robot manipulation. Representative work includes Google's RT-2 and Physical Intelligence's Pi0.
 
