@@ -1,6 +1,6 @@
 ---
 title: "概述"
-description: "在 RDK S600 上完成 Pi0 与 Pi05 视觉语言动作模型的 LeRobot 训练、OELLM2.0 量化编译与板端部署运行。"
+description: "在 RDK S600 上完成 Pi0 与 Pi05 视觉语言动作模型的 LeRobot 训练、OELLM 2.0 量化编译与板端部署运行。"
 sidebar_position: 1
 sidebar_label: 概述
 ---

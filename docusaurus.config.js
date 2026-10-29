@@ -163,30 +163,34 @@ const config = {
             from: "/intro",
             to: "/case",
           },
-          // 高阶案例章节调整：原第四章页面迁入“视觉语言动作模型（VLA）”子类目
+          // 高阶案例：VLA 子目录上移后，旧路径转到当前页面
           {
-            from: "/advanced/holobrain",
-            to: "/advanced/vla/holobrain",
+            from: "/04_advanced/vla",
+            to: "/04_advanced",
           },
           {
             from: "/04_advanced/holobrain",
-            to: "/advanced/vla/holobrain",
+            to: "/advanced/holobrain",
           },
           {
             from: "/advanced/holobrain/faq",
-            to: "/advanced/vla/holobrain#faq",
+            to: "/advanced/holobrain#faq",
           },
           {
-            from: "/advanced/pi0_pi05",
-            to: "/advanced/vla/pi0_pi05",
+            from: "/advanced/vla/holobrain",
+            to: "/advanced/holobrain",
           },
           {
-            from: "/advanced/pi0_pi05/pi0",
-            to: "/advanced/vla/pi0_pi05/pi0",
+            from: "/advanced/vla/pi0_pi05",
+            to: "/advanced/pi0_pi05",
           },
           {
-            from: "/advanced/pi0_pi05/pi05",
-            to: "/advanced/vla/pi0_pi05/pi05",
+            from: "/advanced/vla/pi0_pi05/pi0",
+            to: "/advanced/pi0_pi05/pi0",
+          },
+          {
+            from: "/advanced/vla/pi0_pi05/pi05",
+            to: "/advanced/pi0_pi05/pi05",
           },
         ],
       },

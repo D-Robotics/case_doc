@@ -2,10 +2,10 @@
 title: "HoloBrain 通用物体抓取（真机）"
 description: "在 RDK S600 上完成 HoloBrain 通用物体抓取的环境配置、模型部署与任务运行。"
 sidebar_position: 2
-sidebar_label: 2. HoloBrain 通用物体抓取（真机）
+sidebar_label: 4.2 HoloBrain 通用物体抓取（真机）
 ---
 
-# HoloBrain 通用物体抓取（真机）
+# 4.2 HoloBrain 通用物体抓取（真机）
 
 [HoloBrain](https://horizonrobotics.github.io/robot_lab/holobrain/) 是地平线推出的轻量化 VLA 基座模型，首创“具身感知”架构，融合多视角视觉信息与机器人运动学先验，实现更强的 3D 空间理解与推理能力。通过统一的混合相对动作空间，兼容单臂、双臂及移动操作平台，打破异构硬件壁垒。仅 0.2B 参数即可实现业界领先性能，在 RoboTwin 2.0、LIBERO 等基准测试中达到 SOTA 水平，并支持抓取、叠衣、柔性/变形物体操作等复杂长序列任务。结合 RDK S600 高算力平台，HoloBrain 可实现边缘端实时推理，构建感知—决策—控制全链路低延迟闭环，加速具身智能应用落地。本文将以通用抓取任务为例，详细介绍如何在 RDK S600 平台上完成 HoloBrain 的环境配置、模型部署及任务运行。
 

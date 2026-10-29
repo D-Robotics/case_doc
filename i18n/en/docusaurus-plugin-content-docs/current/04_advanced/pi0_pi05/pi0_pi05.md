@@ -1,6 +1,6 @@
 ---
 title: "Overview"
-description: "Train the Pi0 and Pi05 vision-language-action models with LeRobot, quantize and compile them with OELLM2.0, and deploy them on the RDK S600."
+description: "Train the Pi0 and Pi05 vision-language-action models with LeRobot, quantize and compile them with OELLM 2.0, and deploy them on the RDK S600."
 sidebar_position: 1
 sidebar_label: Overview
 ---

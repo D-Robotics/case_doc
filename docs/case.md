@@ -36,10 +36,9 @@ sidebar_position: 1
 
 面向具身智能场景，展示视觉-语言-动作（VLA）模型的 PC 仿真联调与端侧部署，以及 HoloBrain 通用物体抓取、Pi0 & Pi05 折叠毛巾等真机部署案例。
 
-- **[视觉语言动作模型（VLA）](/04_advanced/vla)**：VLA 案例总览，包含以下三个案例。
-  - **[Pi0 敲木块（仿真）](/advanced/vla)**：在 PC 端部署 RoboTwin 仿真环境，在 S600 端侧部署 Pi0 模型进行推理，涵盖 PC 仿真部署、S600 端侧部署与运行结果展示。
-  - **[HoloBrain 通用物体抓取（真机）](/advanced/vla/holobrain)**：在 RDK S600 上完成 HoloBrain 环境配置、模型部署与通用物体抓取任务运行，涵盖硬件准备、环境搭建、启动停止。常见问题见 [FAQ](/advanced/vla/holobrain#faq)。
-  - **[Pi0 & Pi05 折叠毛巾（真机）](/advanced/vla/pi0_pi05)**：在 RDK S600 上完成 Pi0 与 Pi05 折叠毛巾任务的 LeRobot 训练、OELLM2.0 量化编译与板端部署运行，训练与部署流程分别见 [Pi0](/advanced/vla/pi0_pi05/pi0) 与 [Pi05](/advanced/vla/pi0_pi05/pi05)。
+- **[Pi0 敲木块（仿真）](/advanced/vla)**：在 PC 端部署 RoboTwin 仿真环境，在 S600 端侧部署 Pi0 模型进行推理，涵盖 PC 仿真部署、S600 端侧部署与运行结果展示。
+- **[HoloBrain 通用物体抓取（真机）](/advanced/holobrain)**：在 RDK S600 上完成 HoloBrain 环境配置、模型部署与通用物体抓取任务运行，涵盖硬件准备、环境搭建、启动停止。常见问题见 [FAQ](/advanced/holobrain#faq)。
+- **[Pi0 & Pi05 折叠毛巾（真机）](/advanced/pi0_pi05)**：在 RDK S600 上完成 Pi0 与 Pi05 折叠毛巾任务的 LeRobot 训练、OELLM 2.0 量化编译与板端部署运行，训练与部署流程分别见 [Pi0](/advanced/pi0_pi05/pi0) 与 [Pi05](/advanced/pi0_pi05/pi05)。
 
 ### 5. 参考资料
 
