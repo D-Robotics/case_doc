@@ -229,7 +229,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 lerobot has two dataset formats, v2.1 and v3.0. The training environment used here, lerobot (0.6.2, CODEBASE_VERSION=v3.0), can read only v3.0. The example data is not publicly available. Collect your own data for the robot and the task.
 :::
 
-**v2.1 — xxx**
+**v2.1**
 
 ```text
 .
@@ -250,7 +250,7 @@ lerobot has two dataset formats, v2.1 and v3.0. The training environment used he
         └── right_cam/episode_000000.mp4
 ```
 
-**v3.0 — xxx**
+**v3.0**
 
 ```text
 .

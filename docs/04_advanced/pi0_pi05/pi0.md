@@ -226,7 +226,7 @@ HF_HUB_OFFLINE=1 lerobot-train \
 lerobot 存在 v2.1 与 v3.0 两种数据集格式。本次使用的训练环境 lerobot（0.6.2，CODEBASE_VERSION=v3.0）只能读 v3.0。示例数据不对外开放，开发者根据实机环境和应用场景自行采集。
 :::
 
-**v2.1 — xxx**
+**v2.1**
 
 ```text
 .
@@ -247,7 +247,7 @@ lerobot 存在 v2.1 与 v3.0 两种数据集格式。本次使用的训练环境
         └── right_cam/episode_000000.mp4
 ```
 
-**v3.0 — xxx**
+**v3.0**
 
 ```text
 .
