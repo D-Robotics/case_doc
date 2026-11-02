@@ -36,11 +36,13 @@ yarn.lock
 # package-lock.json
 
 .idea
+.claude/
 
 .env.local
 
 # Local extract / migration work (not needed to run the site)
 .migration-work/
+.doc-migration-work/
 pdf_extract.txt
 Thumbs.db
 

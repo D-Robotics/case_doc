@@ -1,11 +1,11 @@
 ---
-title: "HoloBrain General Object Grasping"
+title: "HoloBrain General Object Grasping (Real Robot)"
 description: "Set up, deploy, and run HoloBrain general object grasping on the RDK S600."
-sidebar_position: 1
-sidebar_label: 1. HoloBrain General Object Grasping
+sidebar_position: 2
+sidebar_label: 2. HoloBrain General Object Grasping (Real Robot)
 ---
 
-# HoloBrain General Object Grasping
+# HoloBrain General Object Grasping (Real Robot)
 
 [HoloBrain](https://horizonrobotics.github.io/robot_lab/holobrain/) is a lightweight VLA foundation model from Horizon Robotics. It introduces an "embodied perception" architecture that fuses multi-view visual information with robot kinematics priors for stronger 3D spatial understanding and reasoning. A unified hybrid relative action space supports single-arm, dual-arm, and mobile manipulation platforms, breaking barriers across heterogeneous hardware. With only 0.2B parameters, it achieves industry-leading performance and SOTA results on benchmarks such as RoboTwin 2.0 and LIBERO, and supports complex long-horizon tasks including grasping, cloth folding, and deformable-object manipulation. Combined with the high-compute RDK S600 platform, HoloBrain enables real-time edge inference and a low-latency perception–decision–control loop, accelerating embodied AI applications. This document uses a general grasping task as an example and walks through environment setup, model deployment, and task execution of HoloBrain on RDK S600.
 
@@ -15,6 +15,14 @@ sidebar_label: 1. HoloBrain General Object Grasping
 | Model | [HoloBrain_v0.0_GD](https://huggingface.co/HorizonRobotics/HoloBrain_v0.0_GD) |
 | Task | General object grasping |
 | Performance (DECODE = 5) | wall=116.823ms <br/> text=9.3007ms <br/> enc=40.2941ms <br/> dec=54.6188ms |
+
+
+## Results
+
+<video controls width="100%" preload="metadata">
+ <source src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-effect.mp4" type="video/mp4" />
+ Your browser does not support the video tag.
+</video>
 
 
 ## Hardware Setup
@@ -99,7 +107,7 @@ rs-enumerate-devices | grep Serial
 
 #### Adjust the Middle Camera Position
 
-The transform between the middle camera and the left arm is shown below. To ensure good results, adjust the middle camera so that the transform (position) is as close as possible to the figure. To determine the actual transform, see the calibration tutorial in [FAQ](./faq).
+The transform between the middle camera and the left arm is shown below. To ensure good results, adjust the middle camera so that the transform (position) is as close as possible to the figure. To determine the actual transform, see the calibration tutorial in [FAQ](#faq).
 
 <img src="https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/holobrain-middle-camera-transform.png" alt="Transform between the middle camera and the left arm" width="40%"/>
 
@@ -393,3 +401,95 @@ In the tmux terminal, press `Ctrl+B`, then press `D` to detach from the tmux ses
 # Kill all processes
 ./launch/stop.sh
 ```
+
+## FAQ
+
+### Q1: What if `apt` cannot locate a package?
+
+```text
+E: Unable to locate package ...
+```
+
+**A:** Run the following command to update the package index, then retry the install.
+
+```bash
+sudo apt update
+```
+
+### Q2: What if the `ros2` command is not found?
+
+```text
+ros2: command not found
+```
+
+**A:** Source the ROS 2 environment with the following commands.
+
+```bash
+source /opt/ros/jazzy/setup.bash
+# If this is a RoboOrchard ROS 2 package, also run:
+source ros2_package/install/setup.bash
+```
+
+### Q3: What if the `can_left` device is missing when you need it?
+
+**A:** Check CAN devices with the following commands.
+
+```bash
+# List all recognized devices
+ip link
+
+# Check CAN mapping
+bash teleop/find-all-can-port.sh
+```
+
+Confirm that the actual CAN devices have been renamed correctly to:
+
+```text
+can_left
+can_right
+```
+
+### Q4: What if the camera has no image?
+
+**A:** Check whether the camera is recognized with the following commands.
+
+```bash
+# First, confirm that the camera is recognized
+rs-enumerate-devices
+
+# Then check whether image topics exist
+ros2 topic list | grep image
+
+# Then inspect a specific image topic
+ros2 topic hz <image_topic>
+ros2 topic info <image_topic> -v
+```
+
+Key checks:
+
+- USB connection is normal
+- USB 3.0 is used
+- Serial Number is configured correctly
+- ROS 2 RealSense driver is running normally
+
+### Q5: What if there is a NumPy / OpenCV / SciPy version conflict?
+
+**A:** Reinstall the related dependencies with the following commands.
+
+```bash
+pip install \
+    "numpy==1.26.4" \
+    "opencv-python<4.11" \
+    "scipy<1.14" \
+    "numpydantic<1.7"
+```
+
+### Q6: How do I calibrate the pose relationship between the left arm and the middle camera? {#handeye-calib}
+
+**A:**
+- See the [calibration tutorial](https://horizonrobotics.github.io/robot_lab/holobrain/real_env/modules/handeye_calib.html).
+- Pay attention to the `RoboOrchard/projects/HoloBrain/handeye_calib/launch_handeye_calib.sh` script configuration.
+- After starting `./launch/start.sh`, start the calibration service with `bash handeye_calib/launch_handeye_calib.sh`.
+- Short-press the button on the robotic arm until it turns green, then move the arm manually to different poses and click **Record Current Pose**.
+- After recording multiple poses, click **Save and Compute Hand-Eye Calibration** to save the calibration file to the current path.
+- Required materials: [aruco marker](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/aruco-100.svg) and a [stand for attaching the aruco marker](https://rdk-doc.oss-cn-beijing.aliyuncs.com/doc/img/samples/s600/zh/Unnamed2-M-COMA-340012-B_final_plate.stl).
