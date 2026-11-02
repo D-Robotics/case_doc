@@ -452,14 +452,52 @@ async function mapLimit(items, limit, worker) {
   return results;
 }
 
+async function fetchSitemapUrls() {
+  const urls = new Set();
+  for (const rel of ["sitemap.xml", "en/sitemap.xml"]) {
+    const sitemapUrl = new URL(rel, SITE_URL).href;
+    try {
+      const res = await fetch(sitemapUrl, {
+        headers: { "user-agent": USER_AGENT },
+        redirect: "follow",
+      });
+      if (!res.ok) {
+        console.warn(`Sitemap unavailable: HTTP ${res.status} for ${sitemapUrl}`);
+        continue;
+      }
+      const xml = await res.text();
+      let count = 0;
+      for (const match of xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)) {
+        const normalized = normalizePageUrl(match[1], SITE_URL);
+        if (normalized) {
+          urls.add(normalized);
+          count += 1;
+        }
+      }
+      console.log(`Sitemap ${sitemapUrl} -> ${count} URLs`);
+    } catch (err) {
+      console.warn(`Sitemap fetch failed for ${sitemapUrl}: ${err.message}`);
+    }
+  }
+  return [...urls];
+}
+
 async function crawl() {
   const site = new URL(SITE_URL);
-  const startUrls = [
-    SITE_URL,
-    new URL("case", SITE_URL).href,
-    new URL("en/", SITE_URL).href,
-    new URL("en/case", SITE_URL).href,
-  ]
+  // 站点根 /case_doc/ 和 /case_doc/en/ 是 meta refresh 空壳（只有一条 canonical），
+  // 爬虫不执行 JS，靠它们做种子只能抓到空页面；原来靠写死 landing 页 slug "case"
+  // 才拿到内容，slug 一改就整体失败。优先用线上 sitemap 做种子。
+  const sitemapUrls = await fetchSitemapUrls();
+  const startUrls = (
+    sitemapUrls.length
+      ? sitemapUrls
+      : [
+          SITE_URL,
+          new URL("case", SITE_URL).href,
+          new URL("en/", SITE_URL).href,
+          new URL("en/case", SITE_URL).href,
+        ]
+  )
     .map((url) => normalizePageUrl(url, SITE_URL))
     .filter(Boolean);
 
